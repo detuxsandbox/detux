@@ -1,0 +1,3 @@
+#!/bin/bash
+wget http://yahoo.com
+ping 8.8.8.8
