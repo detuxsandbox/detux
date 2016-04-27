@@ -2,7 +2,7 @@
 # Copyright (c) 2016 Detux Sandbox, http://detux.org
 # See the file 'COPYING' for copying permission.
 
-from hashlib import *
+from hashlib import md5, sha256, sha1
 import json
 import magic
 from magic import Magic
@@ -37,8 +37,8 @@ class Report:
         static_report = {}
         try:
 
-            for command in analysis_commands.keys():
-                static_report[command] = unicode(os.popen("readelf -a %s" % (self.sample_filepath,)).read(), errors='replace')
+            for cmd_name, cmd in analysis_commands.items():
+                static_report[cmd_name] = unicode(os.popen(cmd % (self.sample_filepath,)).read(), errors='replace')
 
         except Exception as e:
             pass
