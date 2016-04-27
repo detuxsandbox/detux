@@ -1,0 +1,10 @@
+argparse==1.2.1
+dpkt==1.8.7
+ecdsa==0.13
+netaddr==0.7.18
+paramiko==1.16.0
+pexpect==4.0.1
+ptyprocess==0.5.1
+pycrypto==2.6.1
+python-magic==0.4.11
+wsgiref==0.1.2
