@@ -202,10 +202,10 @@ The following command may enable the same for you:
 sudo groupadd -g wireshark
 sudo usermod -a -G wireshark <your user name>
 sudo chmod 750 /usr/bin/dumpcap
-sudo etcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
+sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 ```
-
-If you are unable to capture packets, you need to check if permisions for your users are set correctly and the dumpcap path is right.
+Keep in mind that you might have to logout and login again or reboot the host to apply the permissions.
+If you are unable to capture packets or you get errors related to dumpcap, you need to check if permissions for your users are set correctly and the dumpcap path is right.
 
 ### Detux Config
 The detux.cfg files in the main directory needs to be configured. Each VM section has to be configured with correct Network Params and SSH credentials. You can choose root/non-root user depending on your need.
