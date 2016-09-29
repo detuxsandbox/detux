@@ -56,7 +56,7 @@ class Sandbox:
             # Wait for the snapshot to be restored and then transfer the binary
             time.sleep(5)
             self.scp(ssh_host, ssh_port, ssh_user, ssh_password, binary_filepath, dst_binary_filepath)
-            print "[+] Binary transfered"
+            print "[+] Binary transferred"
             
             # Pre binary execution commands
             pre_exec  = self.ssh_execute(ssh_host, ssh_port, ssh_user, ssh_password, ["chmod +x %s" % (dst_binary_filepath,)])
