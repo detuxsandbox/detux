@@ -17,46 +17,40 @@ config_file = "detux.cfg"
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,)
-    parser.add_argument('--sample', help = "Sample path", required=True)
-    parser.add_argument('--cpu',  help = "CPU type", choices = ['x86', 'x86-64', 'arm', 'mips', 'mipsel'], default = 'auto')
-    parser.add_argument('--int',  help = "Architecture type", choices = ['python', 'perl', 'sh', 'bash'], default = None)
-    parser.add_argument('--report', help = "JSON report output path",  required=True)
+    parser.add_argument('--sample', help = "Sample path", required=True, dest='sample_path')
+    parser.add_argument('--cpu',  help = "CPU type", choices = ['x86', 'x86-64', 'arm', 'mips', 'mipsel'], default = 'auto', dest='cpu')
+    parser.add_argument('--int',  help = "Architecture type", choices = ['python', 'perl', 'sh', 'bash'], default = None, dest='interpreter')
+    parser.add_argument('--timeout',  help = "Set sample runtime", type=int, default = None, required=False, dest='timeout')
+    parser.add_argument('--report', help = "JSON report output path",  required=True, dest='report_path')
 
     args = parser.parse_args()
 
-    sample_path = args.sample
-    cpu = args.cpu
-    interpreter = args.int
-    report_path = args.report 
-
-    print "> Processing", sample_path
+    print "> Processing", args.sample_path
     
     # Process the sample with sandbox
     sandbox = Sandbox(config_file)
     
-
-    if cpu == 'auto':
-        filetype, platform = sandbox.identify_platform(sample_path)
-        print "> CPU:", platform
+    if args.cpu == 'auto':
+        filetype, platform = sandbox.identify_platform(self.sample_path)
+        print "> CPU:", args.platform
         cpu = platform
-    print "> Interpreter:", interpreter
-    result = sandbox.execute(sample_path, cpu, '1', interpreter)
 
-    # Process the sanbox result to prepare a DICT report
-    reporter =  Report(sample_path, result)
-
+    print "> Interpreter:", args.interpreter
+    #IN:   sandbox.execute( FILEPATH, CPU PLATFORM, SANDBOX_ID, INTERPRETER, TIMEOUT)
+    #OUT:  dict(REPORT)
+    result = sandbox.execute(args.sample_path, args.cpu, '1', args.interpreter, args.timeout)
     print "> Generating report"
-    # Retrive the report
+    # Retrive the report and  Process the sanbox result to prepare a DICT report
+    reporter =  Report(args.sample_path, result)
     report = reporter.get_report()
 
     # Dump the Report in JSON format
-
     json_report = json.dumps(report, indent=4, sort_keys=True)
-    
-    with open(report_path, 'w') as f:
+
+    with open(args.report_path, 'w') as f:
         f.write(json_report)
     
-    print "> Report written to", report_path    
+    print "> Report written to", args.report_path    
     
 
 
