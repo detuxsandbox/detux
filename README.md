@@ -217,21 +217,24 @@ The repo contains "detux.py" which analyses the given binary and saves pcap in p
 
 ### Usage
 ```
-usage: detux.py [-h] --sample SAMPLE [--cpu {x86,x86-64,arm,mips,mipsel}]
-                [--int {python,perl,sh,bash}] --report REPORT
+usage: detux.py [-h] --sample SAMPLE_PATH [--cpu {x86,x86-64,arm,mips,mipsel}]
+                [--int {python,perl,sh,bash}] [--timeout TIMEOUT] --report
+                REPORT_PATH
 
 optional arguments:
   -h, --help            show this help message and exit
-  --sample SAMPLE       Sample path (default: None)
+  --sample SAMPLE_PATH  Sample path (default: None)
   --cpu {x86,x86-64,arm,mips,mipsel}
                         CPU type (default: auto)
   --int {python,perl,sh,bash}
                         Architecture type (default: None)
-  --report REPORT       JSON report output path (default: None)
+  --timeout TIMEOUT     Set sample runtime (default: None)
+  --report REPORT_PATH  JSON report output path (default: None)
+
 ```
 Example:
 ```
-python detux.py --sample test_script/example_binary1 --report reports/example_report1.json
+python detux.py --sample test_script/example_binary1 --report reports/example_report1.json --timeout 600
 ```
 
 ### Contributers:
