@@ -62,12 +62,16 @@ class Sandbox:
             pre_exec  = {}
             post_exec = {}
             #pre_exec  = self.ssh_execute(ssh_host, ssh_port, ssh_user, ssh_password, ["netstat -an", "ps aux"])
-            # Move the binary
+            # Move the binary 
+            time.sleep(5)
             self.scp(ssh_host, ssh_port, ssh_user, ssh_password, binary_filepath, dst_binary_filepath)
+            print "[+] Binary transferred"
+            
             # Pre binary execution commands
             pre_exec  = self.ssh_execute(ssh_host, ssh_port, ssh_user, ssh_password, ["chmod +x %s" % (dst_binary_filepath,)])
 
             # Start Packet Capture
+            print "[+] Packet Capture started"
             pcap_filepath = os.path.join(pcap_folder, "%s_%d.cap" %(sha256hash,time.time(),))
             pcapture = pexpect.spawn(pcap_command % (ifname, pcap_filepath, ssh_port, ssh_host, ssh_port, ssh_host))
 
