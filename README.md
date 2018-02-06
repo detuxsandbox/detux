@@ -1,5 +1,5 @@
-# Detux: The Multiplatform Linux Sandbox
 ![Logo](detux.png)
+## The Multiplatform Linux Sandbox
 
 
 ### Introduction:
