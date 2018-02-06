@@ -16,29 +16,43 @@ class Sandbox:
         self.config = ConfigParser()
         self.config.read(config_path)
         self.default_cpu = self.config.get("detux", "default_cpu")
+        self.debug = self.config.get("detux", "debug_log")
         
-    def execute(self, binary_filepath, platform, sandbox_id, interpreter = None):
+    def execute(self, binary_filepath, sample_args, platform, sandbox_id, interpreter = None, timeout=None):
         sandbox_starttime = time.time()
         sandbox_endtime   = sandbox_starttime
-        vm_exec_time = self.config.getint("detux", "vm_exec_time")
+        if timeout == None:
+            vm_exec_time = self.config.getint("detux", "vm_exec_time")
+        else:
+            vm_exec_time = int(timeout)
+
         qemu_command = self.qemu_commands(platform, sandbox_id) 
+
         pcap_folder = self.config.get("detux", "pcap_folder")
         if not os.path.isdir(pcap_folder):
             os.mkdir(pcap_folder)
+
         ssh_host = self.config.get(platform+"-"+sandbox_id, "ip")
         ssh_user = self.config.get(platform+"-"+sandbox_id, "user")
         macaddr  = self.config.get(platform+"-"+sandbox_id, "macaddr")
         ssh_password = self.config.get(platform+"-"+sandbox_id, "password")
         ssh_port  = self.config.getint(platform+"-"+sandbox_id, "port")
-        pcap_command = "/usr/bin/dumpcap -i %s -P -w %s -f 'not ((tcp dst port %d and ip dst host %s) or (tcp src port %d and ip src host %s))'"
+
+        pcap_command = "/usr/sbin/tcpdump -i %s -w %s  'not ((tcp dst port %d and ip dst host %s) or (tcp src port %d and ip src host %s))'"
         # A randomly generated sandbox filename       
         dst_binary_filepath = "/tmp/" + ("".join(chr(random.choice(xrange(97,123))) for _ in range(random.choice(range(6,12)))))
+
+        if len(sample_args) > 0:
+            dst_binary_filepath = dst_binary_filepath + " " + sample_args
+
         sha256hash = sha256(open(binary_filepath, "rb").read()).hexdigest()
         interpreter_path = { "python" : "/usr/bin/python", "perl" : "/usr/bin/perl", "sh" : "/bin/sh", "bash" : "/bin/bash"  }
         if qemu_command == None :
             return {}
+
         qemu_command += " -net nic,macaddr=%s -net tap -monitor stdio" % (macaddr,)  
-        print qemu_command    
+        if self.debug:
+            print qemu_command    
         qemu = pexpect.spawn(qemu_command)
         try: 
             qemu.expect("(qemu).*")
@@ -47,7 +61,6 @@ class Sandbox:
             ifname =  qemu.before.split("ifname=", 1)[1].split(",", 1)[0]
             qemu.sendline("loadvm init")
             qemu.expect("(qemu).*")
-
 
             pre_exec  = {}
             post_exec = {}
@@ -58,7 +71,7 @@ class Sandbox:
             pre_exec  = self.ssh_execute(ssh_host, ssh_port, ssh_user, ssh_password, ["chmod +x %s" % (dst_binary_filepath,)])
 
             # Start Packet Capture
-            pcap_filepath = os.path.join(pcap_folder, "%s_%d.cap" %(sha256hash,time.time(),))
+            pcap_filepath = os.path.join(pcap_folder, "%s.pcap" %(sha256hash,))
             pcapture = pexpect.spawn(pcap_command % (ifname, pcap_filepath, ssh_port, ssh_host, ssh_port, ssh_host))
 
             # wait for pcapture to start and then Execute the binary
@@ -90,7 +103,7 @@ class Sandbox:
             result['cpu_arch'] = platform
             result['interpreter'] = interpreter
         except Exception as e:
-            print "[-] Error:", e
+            print "[-] Error-", e
             if qemu.isalive():
                 qemu.close()
             return {}

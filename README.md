@@ -1,4 +1,6 @@
-# Detux: The Multiplatform Linux Sandbox
+![Logo](detux.png)
+## The Multiplatform Linux Sandbox
+
 
 ### Introduction:
 Detux is a sandbox developed to do traffic analysis of the Linux malwares and capture the IOCs by doing so. QEMU hypervisor is used to emulate Linux (Debian) for various CPU architectures.
@@ -202,10 +204,11 @@ The following command may enable the same for you:
 sudo groupadd -g wireshark
 sudo usermod -a -G wireshark <your user name>
 sudo chmod 750 /usr/bin/dumpcap
-sudo etcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
+sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 ```
 
-If you are unable to capture packets, you need to check if permisions for your users are set correctly and the dumpcap path is right.
+Keep in mind that you might have to logout and login again or reboot the host to apply the permissions.
+If you are unable to capture packets or you get errors related to dumpcap, you need to check if permissions for your users are set correctly and the dumpcap path is right.
 
 ### Detux Config
 The detux.cfg files in the main directory needs to be configured. Each VM section has to be configured with correct Network Params and SSH credentials. You can choose root/non-root user depending on your need.
@@ -217,21 +220,24 @@ The repo contains "detux.py" which analyses the given binary and saves pcap in p
 
 ### Usage
 ```
-usage: detux.py [-h] --sample SAMPLE [--cpu {x86,x86-64,arm,mips,mipsel}]
-                [--int {python,perl,sh,bash}] --report REPORT
+usage: detux.py [-h] --sample SAMPLE_PATH [--cpu {x86,x86-64,arm,mips,mipsel}]
+                [--int {python,perl,sh,bash}] [--timeout TIMEOUT] --report
+                REPORT_PATH
 
 optional arguments:
   -h, --help            show this help message and exit
-  --sample SAMPLE       Sample path (default: None)
+  --sample SAMPLE_PATH  Sample path (default: None)
   --cpu {x86,x86-64,arm,mips,mipsel}
                         CPU type (default: auto)
   --int {python,perl,sh,bash}
                         Architecture type (default: None)
-  --report REPORT       JSON report output path (default: None)
+  --timeout TIMEOUT     Set sample runtime (default: None)
+  --report REPORT_PATH  JSON report output path (default: None)
+
 ```
 Example:
 ```
-python detux.py --sample test_script/example_binary1 --report reports/example_report1.json
+python detux.py --sample test_script/example_binary1 --report reports/example_report1.json --timeout 600
 ```
 
 ### Contributers:

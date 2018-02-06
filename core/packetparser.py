@@ -131,9 +131,12 @@ class PacketParser:
 
 
 if __name__ == "__main__":
-    pparse = PacketParser(sys.argv[1])
-    print pparse.get_urls()
-    print pparse.get_dns_requests()
-    print pparse.get_network_connections()
-
-
+    if len(sys.argv)==2:
+        import os.path
+        if os.path.isfile(sys.argv[1]):
+            pparse = PacketParser(sys.argv[1])
+            print pparse.get_urls()
+            print pparse.get_dns_requests()
+            print pparse.get_network_connections()
+    else:
+        print "Usage: packetparser.py mypcapcapture.pcap"
