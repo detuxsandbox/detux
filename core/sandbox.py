@@ -18,7 +18,7 @@ class Sandbox:
         self.default_cpu = self.config.get("detux", "default_cpu")
         self.debug = self.config.get("detux", "debug_log")
         
-    def execute(self, binary_filepath, platform, sandbox_id, interpreter = None, timeout=None):
+    def execute(self, binary_filepath, sample_args, platform, sandbox_id, interpreter = None, timeout=None):
         sandbox_starttime = time.time()
         sandbox_endtime   = sandbox_starttime
         if timeout == None:
@@ -38,9 +38,13 @@ class Sandbox:
         ssh_password = self.config.get(platform+"-"+sandbox_id, "password")
         ssh_port  = self.config.getint(platform+"-"+sandbox_id, "port")
 
-        pcap_command = "/usr/bin/dumpcap -i %s -P -w %s -f 'not ((tcp dst port %d and ip dst host %s) or (tcp src port %d and ip src host %s))'"
+        pcap_command = "/usr/sbin/tcpdump -i %s -w %s  'not ((tcp dst port %d and ip dst host %s) or (tcp src port %d and ip src host %s))'"
         # A randomly generated sandbox filename       
         dst_binary_filepath = "/tmp/" + ("".join(chr(random.choice(xrange(97,123))) for _ in range(random.choice(range(6,12)))))
+
+        if len(sample_args) > 0:
+            dst_binary_filepath = dst_binary_filepath + " " + sample_args
+
         sha256hash = sha256(open(binary_filepath, "rb").read()).hexdigest()
         interpreter_path = { "python" : "/usr/bin/python", "perl" : "/usr/bin/perl", "sh" : "/bin/sh", "bash" : "/bin/bash"  }
         if qemu_command == None :
@@ -58,21 +62,16 @@ class Sandbox:
             qemu.sendline("loadvm init")
             qemu.expect("(qemu).*")
 
-
             pre_exec  = {}
             post_exec = {}
             #pre_exec  = self.ssh_execute(ssh_host, ssh_port, ssh_user, ssh_password, ["netstat -an", "ps aux"])
-            # Move the binary 
-            time.sleep(5)
+            # Move the binary
             self.scp(ssh_host, ssh_port, ssh_user, ssh_password, binary_filepath, dst_binary_filepath)
-            print "[+] Binary transferred"
-            
             # Pre binary execution commands
             pre_exec  = self.ssh_execute(ssh_host, ssh_port, ssh_user, ssh_password, ["chmod +x %s" % (dst_binary_filepath,)])
 
             # Start Packet Capture
-            print "[+] Packet Capture started"
-            pcap_filepath = os.path.join(pcap_folder, "%s_%d.cap" %(sha256hash,time.time(),))
+            pcap_filepath = os.path.join(pcap_folder, "%s.pcap" %(sha256hash,))
             pcapture = pexpect.spawn(pcap_command % (ifname, pcap_filepath, ssh_port, ssh_host, ssh_port, ssh_host))
 
             # wait for pcapture to start and then Execute the binary

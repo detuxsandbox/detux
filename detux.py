@@ -1,5 +1,7 @@
+#!/usr/bin/env python
 # Copyright (c) 2015 Vikas Iyengar, iyengar.vikas@gmail.com (http://garage4hackers.com)
 # Copyright (c) 2016 Detux Sandbox, http://detux.org
+# Ongoing changes made my Silas Cutler (Silas.Cutler@BlackListThisDomain.com)
 # See the file 'COPYING' for copying permission.
 
 # Import Detux packages
@@ -22,23 +24,32 @@ if __name__ == "__main__":
     parser.add_argument('--int',  help = "Architecture type", choices = ['python', 'perl', 'sh', 'bash'], default = None, dest='interpreter')
     parser.add_argument('--timeout',  help = "Set sample runtime", type=int, default = None, required=False, dest='timeout')
     parser.add_argument('--report', help = "JSON report output path",  required=True, dest='report_path')
+    parser.add_argument('--arguments', help = "Sample Arguments",  required=False, dest='sample_args')
 
     args = parser.parse_args()
+    cpu = ""
 
     print "> Processing", args.sample_path
     
     # Process the sample with sandbox
     sandbox = Sandbox(config_file)
+
+    print "> Args:", args.sample_args
     
     if args.cpu == 'auto':
         filetype, platform = sandbox.identify_platform(self.sample_path)
         print "> CPU:", args.platform
         cpu = platform
+    else:
+        cpu = args.cpu
+
+    print "> CPU:", cpu 
 
     print "> Interpreter:", args.interpreter
     #IN:   sandbox.execute( FILEPATH, CPU PLATFORM, SANDBOX_ID, INTERPRETER, TIMEOUT)
     #OUT:  dict(REPORT)
-    result = sandbox.execute(args.sample_path, args.cpu, '1', args.interpreter, args.timeout)
+    result = sandbox.execute(args.sample_path, args.sample_args, cpu, '1', args.interpreter, args.timeout)
+
     print "> Generating report"
     # Retrive the report and  Process the sanbox result to prepare a DICT report
     reporter =  Report(args.sample_path, result)
