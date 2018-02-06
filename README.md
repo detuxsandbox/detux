@@ -1,4 +1,6 @@
 # Detux: The Multiplatform Linux Sandbox
+![Logo](detux.png)
+
 
 ### Introduction:
 Detux is a sandbox developed to do traffic analysis of the Linux malwares and capture the IOCs by doing so. QEMU hypervisor is used to emulate Linux (Debian) for various CPU architectures.
