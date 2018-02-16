@@ -8,3 +8,4 @@ ptyprocess==0.5.1
 pycrypto==2.6.1
 python-magic==0.4.11
 wsgiref==0.1.2
+requests==2.18.4
