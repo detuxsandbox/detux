@@ -11,6 +11,11 @@ import json
 import sys
 import os
 import argparse
+import requests
+
+
+from ConfigParser import ConfigParser
+
 
 config_file = "detux.cfg"
 
@@ -56,7 +61,19 @@ if __name__ == "__main__":
     with open(report_path, 'w') as f:
         f.write(json_report)
     
-    print "> Report written to", report_path    
+    print "> Report written to", report_path  
+
+    # Store Result in ES
+    config = ConfigParser()
+    config.read(config_path)
+    es_enabled = config.get("es", "es_enabled")
+    es_url = config.get("es", "es_server")
+    
+
+    if es_enabled == True:
+        result = requests.put( es_server + "/reports", data=json_report)
+
+  
     
 
 
