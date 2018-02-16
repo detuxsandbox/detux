@@ -238,7 +238,7 @@ python detux.py --sample test_script/example_binary1 --report reports/example_re
 - Vikas Iyengar - The brain ( [dudeintheshell](https://github.com/dudeintheshell) , email: iyengar.vikas@gmail.com ) 
 - Muslim Koser - Technichal thought works (muslimk@gmail.com)
 - Rahul Binjve - Help in pcap parsing ([@c0dist](https://github.com/c0dist), [twitter](https://twitter.com/c0dist))
-- Amey Gat - Help in pcap parsing ([ameygat](https://github.com/ameygat), ameygat@gmail.com )
+- Amey Gat - Help in pcap parsing ([ameygat](https://github.com/ameygat),[twitter](https://twitter.com/ameygat))
 
 ### Thanks
 Thanks to Aurélien Jarno (@aurel32) (https://www.aurel32.net/) for the pre-built VM images.
