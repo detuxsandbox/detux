@@ -86,17 +86,18 @@ class PacketParser:
             print "[-] Error in geturl() : %s " % (e,)
         return urls
 
-    def get_dns_requests(self,protocols = ['TCP','UDP']):
+    def get_dns_requests(self, protocols=['TCP', 'UDP']):
         self.load_pcap()
         cnt = 0
         dns_list = []
+
         try:
             for timestamp, buf in self.pcap:
                 try:
-                    #Some times buf contains \x00 so this checks skip them 
-                    cnt +=1
+                    # Some times buf contains \x00 so this checks skip them 
+                    cnt += 1
                     if buf == '\x00\x00\x00\x00':
-                        #Some pcap files have bytes 00 in beginning, just discard them
+                        # Some pcap files have bytes 00 in beginning, just discard them
                         continue
                     else:
                         eth = dpkt.ethernet.Ethernet(buf)
@@ -105,30 +106,65 @@ class PacketParser:
 
                         if tcp.__class__.__name__ in protocols:
                             if tcp.sport == 53 or tcp.dport == 53:
-                                if eth.type == 2048 and ip.p == 17 :
-                                    try:
-                                        dns = dpkt.dns.DNS(tcp.data)
-                                    except:
-                                        #print "Error:DNS"
-                                            continue # Discard errornous Data
-                                    if dns.qr == dpkt.dns.DNS_R and dns.opcode == dpkt.dns.DNS_QUERY and dns.rcode == dpkt.dns.DNS_RCODE_NOERR:
-                                        if len(dns.an) >= 1:
-                                            for answer in dns.an:
-                                                req = { }
-                                                if answer.type == 1: #DNS_A
-                                                    req = {'type': 'A', 'name': unicode(answer.name, errors='replace'),'result': socket.inet_ntoa(answer.rdata)}
-                                                elif answer.type == 5:  # "CNAME request"
-                                                    req = {'type': 'CN', 'name': unicode(answer.name, errors='replace'),'result': unicode(answer.cname, errors='replace')}
-                                                elif answer.type == 12:
-                                                         #print "PTR request", answer.name, "\tresponse", answer.ptrn
-                                                    req = {'type': 'PTR', 'name': unicode(answer.name, errors='replace'),'result': unicode(answer.ptrname, errors='replace')}
-                                                if req <> {} : dns_list.append(req)
+                                if eth.type == 2048 and ip.p == 17:
+                                    dns_list.extend(self.parse_dns_packet(tcp.data))
                 except Exception as e:
-                    print "[-] Error in get_dns_request() : %s " % (e,) 
+                    print "[-] Error in get_dns_request() : %s " % (e,)
         except Exception as e:
-            print "[-] Error in get_dns_request() : %s " % (e,)           
-        return dns_list    
+            print "[-] Error in get_dns_request() : %s " % (e,)
+        return dns_list
 
+    def parse_dns_packet(self, tcp_data):
+        reqs = []
+
+        try:
+            dns = dpkt.dns.DNS(tcp_data)
+        except dpkt.dpkt.UnpackError:
+            return []
+
+        if (dns.qr == dpkt.dns.DNS_R
+                and dns.opcode == dpkt.dns.DNS_QUERY
+                and dns.rcode == dpkt.dns.DNS_RCODE_NOERR):
+
+            if len(dns.an) > 0:
+                for answer in dns.an:
+                    req = {}
+                    name = answer.name
+
+                    if answer.type == dpkt.dns.DNS_A:
+                        req = {
+                           'type': 'A',
+                           'name': name,
+                           'result': socket.inet_ntoa(answer.rdata)
+                        }
+                    elif answer.type == dpkt.dns.DNS_CNAME:
+                        req = {
+                            'type': 'CN',
+                            'name': name,
+                            'result': unicode(answer.cname, errors='replace')
+                        }
+                    elif answer.type == dpkt.dns.DNS_PTR:
+                        req = {
+                            'type': 'PTR',
+                            'name': name,
+                            'result': unicode(answer.ptrname, errors='replace')
+                        }
+                    elif answer.type == dpkt.dns.DNS_TXT:
+                        req = {
+                            'type': 'TXT',
+                            'name': name,
+                            'result': unicode(','.join(answer.text))
+                        }
+                    elif answer.type == dpkt.dns.DNS_AAAA:
+                        req = {
+                            'type': 'AAAA',
+                            'name': name,
+                            'result': socket.inet_ntop(socket.AF_INET6, socket.inet_pton(socket.AF_INET6, answer.rdata))
+                        }
+
+                    if req: reqs.append(req)
+
+        return reqs
 
 if __name__ == "__main__":
     if len(sys.argv)==2:
