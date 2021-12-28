@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (c) 2015 Vikas Iyengar, iyengar.vikas@gmail.com (http://garage4hackers.com)
 # Copyright (c) 2016 Detux Sandbox, http://detux.org
-# Ongoing changes made my Silas Cutler (Silas.Cutler@BlackListThisDomain.com)
+# Copyright (c) 2021 Silas Cutler, silas.cutler@gmail.com (https://silascutler.com/)
 # See the file 'COPYING' for copying permission.
 
 # Import Detux packages
@@ -29,39 +29,41 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cpu = ""
 
-    print "> Processing", args.sample_path
+    print("> Processing", args.sample_path)
     
     # Process the sample with sandbox
     sandbox = Sandbox(config_file)
 
-    print "> Args:", args.sample_args
+    print("> Args:", args.sample_args)
     
     if args.cpu == 'auto':
         filetype, platform = sandbox.identify_platform(self.sample_path)
-        print "> CPU:", args.platform
+        print("> CPU:", args.platform)
         cpu = platform
     else:
         cpu = args.cpu
 
-    print "> CPU:", cpu 
-
-    print "> Interpreter:", args.interpreter
+    print("> CPU:", cpu )
+    print("> Interpreter:", args.interpreter)
     #IN:   sandbox.execute( FILEPATH, CPU PLATFORM, SANDBOX_ID, INTERPRETER, TIMEOUT)
     #OUT:  dict(REPORT)
+ 
+
+
     result = sandbox.execute(args.sample_path, args.sample_args, cpu, '1', args.interpreter, args.timeout)
 
-    print "> Generating report"
-    # Retrive the report and  Process the sanbox result to prepare a DICT report
-    reporter =  Report(args.sample_path, result)
-    report = reporter.get_report()
-
-    # Dump the Report in JSON format
-    json_report = json.dumps(report, indent=4, sort_keys=True)
-
-    with open(args.report_path, 'w') as f:
-        f.write(json_report)
-    
-    print "> Report written to", args.report_path    
+#    print("> Generating report")
+#    # Retrive the report and  Process the sanbox result to prepare a DICT report
+#    reporter =  Report(args.sample_path, result)
+#    report = reporter.get_report()
+#
+#    # Dump the Report in JSON format
+#    json_report = json.dumps(report, indent=4, sort_keys=True)
+#
+#    with open(args.report_path, 'w') as f:
+#        f.write(json_report)
+#    
+#    print("> Report written to", args.report_path    )
     
 
 

@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 # Copyright (c) 2015 Vikas Iyengar, iyengar.vikas@gmail.com (http://garage4hackers.com)
 # Copyright (c) 2016 Detux Sandbox, http://detux.org
-# See the file 'COPYING' for copying permission.
+# Copyright (c) 2021 Silas Cutler, silas.cutler@gmail.com (https://silascutler.com/)
+# See the file 'COPYING' for copying permission..
 
 import pexpect
 import paramiko
