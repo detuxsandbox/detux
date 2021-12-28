@@ -30,10 +30,20 @@ class Hypervisor(object):
             return None
         return host
 
+    def restore_snapshot(self):
+        dom0.revertToSnapshot(dom0.snapshotCurrent())
+
+
+
+
 
 if __name__ == "__main__":
     h = Hypervisor()
     dom0 = h.lookup("detuxng_x64_ubuntu_2004")
 
     print("Domain 0: id %d running %s" % (dom0.ID(), dom0.OSType()))
+
+
+    print(dom0.info())
+    dom0.reboot()
     print(dom0.info())

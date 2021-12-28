@@ -18,7 +18,7 @@ virt-install \
     --virt-type kvm \
     --os-type linux \
     --os-variant ubuntu20.04 \
-    --graphics spice,listen=127.0.0.1 \
     --network network=default \
+    --graphics none \
     --location 'http://archive.ubuntu.com/ubuntu/dists/focal/main/installer-amd64/'  \
-    --extra-args "console=tty0 console=ttyS0,115200n8"
+    --extra-args "console=tty0 console=ttyS0,115200n8" \
