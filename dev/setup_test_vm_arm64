@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#ISODIR="/var/lib/libvirt/isos"
+DISKDIR="/var/lib/libvirt/images/"
+
+# Format detuxng_ARCH_OS_version (_ split)
+NAME="detuxng_aarch64_ubuntu_2004"
+#echo "Creating ISOs dir: $(ISODIR)"
+#sudo mkdir $(ISODIR)
+
+
+# Using a live installer for Ubuntu 20.04
+virt-install \
+    --arch aarch64 \
+    --name $NAME \
+    --ram 4096 \
+    --disk path=$DISKDIR/$NAME.qcow2,size=20 \
+    --vcpus 2 \
+    --machine virt \
+    --hvm \
+    --os-type linux \
+    --os-variant ubuntu20.04 \
+    --graphics none \
+    --network network=default \
+    --location 'http://ports.ubuntu.com/dists/focal/main/installer-arm64/'  \
+    --extra-args "console=tty0 console=ttyS0,115200n8"

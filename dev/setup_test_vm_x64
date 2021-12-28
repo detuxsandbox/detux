@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#ISODIR="/var/lib/libvirt/isos"
+DISKDIR="/var/lib/libvirt/images/"
+
+# Format detuxng_ARCH_OS_version (_ split)
+NAME="detuxng_x64_ubuntu_2004"
+#echo "Creating ISOs dir: $(ISODIR)"
+#sudo mkdir $(ISODIR)
+
+
+# Using a live installer for Ubuntu 20.04
+virt-install \
+    --name $NAME \
+    --ram 4096 \
+    --disk path=$DISKDIR/$NAME.qcow2,size=20 \
+    --vcpus 2 \
+    --virt-type kvm \
+    --os-type linux \
+    --os-variant ubuntu20.04 \
+    --graphics spice,listen=127.0.0.1 \
+    --network network=default \
+    --location 'http://archive.ubuntu.com/ubuntu/dists/focal/main/installer-amd64/'  \
+    --extra-args "console=tty0 console=ttyS0,115200n8"

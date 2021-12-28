@@ -5,17 +5,35 @@
 import libvirt
 import sys
 
-try:
-    conn = libvirt.openReadOnly(None)
-except libvirt.libvirtError:
-    print('Failed to open connection to the hypervisor')
-    sys.exit(1)
+import logging
 
-try:
-    dom0 = conn.lookupByName("Domain-0")
-except libvirt.libvirtError:
-    print('Failed to find the main domain')
-    sys.exit(1)
+log = logging.getLogger("obj_hypervisor")
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)    
+log.addHandler(handler)
+log.setLevel(logging.DEBUG)
 
-print("Domain 0: id %d running %s" % (dom0.ID(), dom0.OSType()))
-print(dom0.info())
+
+class Hypervisor(object):
+    def __init__(self, sconn='qemu:///system'):
+        try:
+            self.conn = libvirt.open(sconn)
+        except libvirt.libvirtError:
+            log.error('Failed to open connection to the hypervisor')
+            sys.exit(1)     
+    def lookup(self, name):
+        try:
+            host = self.conn.lookupByName(name)
+        except libvirt.libvirtError:
+            log.error('Failed to find the main domain')
+            return None
+        return host
+
+
+if __name__ == "__main__":
+    h = Hypervisor()
+    dom0 = h.lookup("detuxng_x64_ubuntu_2004")
+
+    print("Domain 0: id %d running %s" % (dom0.ID(), dom0.OSType()))
+    print(dom0.info())
