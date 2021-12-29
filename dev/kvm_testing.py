@@ -47,3 +47,12 @@ if __name__ == "__main__":
     print(dom0.info())
 #    dom0.reboot()
 #    print(dom0.info())
+
+
+
+# import kvm_testing
+# k = kvm_testing.Hypervisor()
+# host = k.lookup("detuxng_x64_ubuntu_2004")
+# 
+# 
+

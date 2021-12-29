@@ -17,8 +17,8 @@ f = filesystem.FileSystem(disk)
 f.mount(readonly=False)
 
 
-import filesystem
-f = filesystem.FileSystem('/var/lib/libvirt/images/detuxng_x64_ubuntu_2004.qcow2')
-f.mount(readonly=False)
-f.download('/etc/passwd', './testpas')
-
+#import filesystem
+#f = filesystem.FileSystem('/var/lib/libvirt/images/detuxng_x64_ubuntu_2004.qcow2')
+#f.mount(readonly=False)
+#f.download('/etc/passwd', './testpas')
+#f.upload('../test_script/example_binary1', '/testing')
