@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,)
     parser.add_argument('--sample', help = "Sample path", required=True, dest='sample_path')
     parser.add_argument('--cpu',  help = "CPU type", choices = ['x64'], default = 'auto', dest='cpu')
+    parser.add_argument('--os',  help = "Operating System type", choices = ['windows', 'linux'], default = 'auto', dest='os')    
     parser.add_argument('--int',  help = "Architecture type", choices = ['python', 'perl', 'sh', 'bash'], default = None, dest='interpreter')
     parser.add_argument('--timeout',  help = "Set sample runtime", type=int, default = None, required=False, dest='timeout')
     parser.add_argument('--report', help = "JSON report output path",  required=True, dest='report_path')
@@ -33,27 +34,29 @@ if __name__ == "__main__":
     print("> Processing", args.sample_path)
     print("> Args:", args.sample_args)
 
-    
+    # Setup our sample run 
+    samplerun = SandboxRun(args.sample_path, args.sample_args, args.cpu, args.os, args.timeout)
 
-    sandbox = Sandbox(config_file)
+    # Setup our handle the the hypervisor 
+    hypervisor = Hypervisor()
 
-    #print(sandbox.sandboxes)
-    print(sandbox.get_sandbox_by_arch("x64"))
-#    samplerun = SandboxRun(args.sample_path, args.sample_args, args.cpu, args.timeout)
+    # Setup our Sandbox handle
+    sandbox = Sandbox(config_file, hypervisor)
 
-#    print("> CPU:", samplerun.platform)
-#    print("> FileType:", samplerun.filetype)
+
+
+    print("> CPU:", samplerun.platform)
+    print("> FileType:", samplerun.filetype)
 #
 #    print("> Interpreter:", args.interpreter)
-    #IN:   sandbox.execute( FILEPATH, CPU PLATFORM, SANDBOX_ID, INTERPRETER, TIMEOUT)
+    #IN:   sandbox.execute( samplerun )
     #OUT:  dict(REPORT)
 
 
-#    hypervisor = Hypervisor()
- 
+#    print(hypervisor.list_vms())
 
 
-#    result = sandbox.execute(samplerun)
+    result = sandbox.run(samplerun)
 
 #    print("> Generating report")
 #    # Retrive the report and  Process the sanbox result to prepare a DICT report

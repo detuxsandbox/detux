@@ -4,15 +4,12 @@
 
 import logging
 
-log = logging.getLogger("obj_hypervisor")
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-handler.setFormatter(formatter)    
-log.addHandler(handler)
-log.setLevel(logging.DEBUG)
-
-
-class detux(object):
-    def __init__(self):
-        pass
+def new_logger(name, level=logging.DEBUG):
+    log = logging.getLogger(name)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    handler.setFormatter(formatter)    
+    log.addHandler(handler)
+    log.setLevel(level)
+    return log
         

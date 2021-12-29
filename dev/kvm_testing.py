@@ -21,7 +21,9 @@ class Hypervisor(object):
             self.conn = libvirt.open(sconn)
         except libvirt.libvirtError:
             log.error('Failed to open connection to the hypervisor')
-            sys.exit(1)     
+            sys.exit(1)
+        self.generate_dhcp_mapping()
+        
     def lookup(self, name):
         try:
             host = self.conn.lookupByName(name)
@@ -32,6 +34,7 @@ class Hypervisor(object):
 
     def restore_snapshot(self):
         dom0.revertToSnapshot(dom0.snapshotCurrent())
+
 
 
 
@@ -50,9 +53,9 @@ if __name__ == "__main__":
 
 
 
-# import kvm_testing
-# k = kvm_testing.Hypervisor()
-# host = k.lookup("detuxng_x64_ubuntu_2004")
+import kvm_testing
+k = kvm_testing.Hypervisor()
+host = k.lookup("detuxng_x64_ubuntu_2004")
 # 
 # 
 
