@@ -3,7 +3,7 @@
 # Format detuxng_ARCH_OS_version (_ split)
 NAME="detuxng_x64_ubuntu_2004"
 
-virsh snapshot-create
+virsh snapshot-create $NAME
 
 
 

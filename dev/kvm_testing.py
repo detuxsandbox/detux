@@ -45,5 +45,5 @@ if __name__ == "__main__":
 
 
     print(dom0.info())
-    dom0.reboot()
-    print(dom0.info())
+#    dom0.reboot()
+#    print(dom0.info())

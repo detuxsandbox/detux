@@ -3,15 +3,15 @@
 import sys
 import guestfs
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     print("inspect_vm: missing disk image to inspect", file=sys.stderr)
     sys.exit(1)
 disk = sys.argv[1]
+payload = sys.argv[2]
+
 
 g = guestfs.GuestFS(python_return_dict=True)
-
 g.add_drive_opts(disk, readonly=1)
-
 g.launch()
 
 # Ask libguestfs to inspect for operating systems.
@@ -22,25 +22,15 @@ if len(roots) == 0:
 
 for root in roots:
     print("Root device: %s" % root)
-
-    # Print basic information about the operating system.
-    print("  Product name: %s" % (g.inspect_get_product_name(root)))
-    print("  Version:      %d.%d" %
-          (g.inspect_get_major_version(root),
-           g.inspect_get_minor_version(root)))
-    print("  Type:         %s" % (g.inspect_get_type(root)))
-    print("  Distro:       %s" % (g.inspect_get_distro(root)))
-
-    # Mount up the disks, like guestfish -i.
-    #
-    # Sort keys by length, shortest first, so that we end up
-    # mounting the filesystems in the correct order.
     mps = g.inspect_get_mountpoints(root)
     for device, mp in sorted(mps.items(), key=lambda k: len(k[0])):
         try:
-            g.mount_ro(mp, device)
+            g.mount(mp, device)
         except RuntimeError as msg:
             print("%s (ignored)" % msg)
+
+
+
 
     # If /etc/issue.net file exists, print up to 3 lines.
     filename = "/etc/issue.net"
