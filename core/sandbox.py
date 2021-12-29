@@ -36,15 +36,14 @@ class Linux_SandboxHandler(object):
             print(e)
             return False
 
-    def exec(self, commands, timeout=30, noprompt = False):
+    def exec(self, commands, timeout=10, noprompt = False):
         result = None
 
         try:
-            if type(commands) == type(str()):
-                stdin, stdout, stderr  = self.ssh.exec_command(commands, timeout=timeout)
-                if noprompt == False:    
-                    result = "".join(stdout.readlines())
+            stdin, stdout, stderr  = self.ssh.exec_command(commands, timeout=timeout)
+            result = "".join(stdout.readlines()+ stderr.readlines())
         except Exception as e:
+            print(e)
             print("[+] Error in ssh_execute: %s" % (e,))
             return None
         return result
@@ -177,7 +176,9 @@ class Sandbox:
         conn.exec("chmod +x /sample")
 
         # TODO - Don't rely on timeout
-        results.execution_log = conn.exec("/sample", timeout=30)
+        print("START!")
+        results.execution_log = conn.exec("nohup /sample > /dev/null 2>&1 >> /var/log/runlog &")
+        print("STOP!")
         print(results.execution_log)
 
         end_ps = conn.list_procs()

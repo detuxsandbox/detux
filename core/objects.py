@@ -15,10 +15,12 @@ log = new_logger("objects")
 class ExecutionResults(object):
     def __init__(self):
         self.uniq_procs = []
+        self.execution_log = ""
         pass
+
     def process_results(self, start, end):
         print("diff start-end") #TODO
-
+        self.uniq_procs = []
 
 
 
