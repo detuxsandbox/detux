@@ -6,8 +6,7 @@ from hashlib import md5, sha256, sha1
 import json
 import magic
 from magic import Magic
-from sandbox import Sandbox
-from packetparser import PacketParser
+from core.packetparser import PacketParser
 import os
 from datetime import datetime
 import uuid

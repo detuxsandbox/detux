@@ -47,9 +47,9 @@ class PacketParser:
                         else:
                             ip_list[ip_proto.__class__.__name__].add(dstip.format())   
                 except Exception as e:
-                    print "[+] Error in get_public_IPs: %s" % (e,) 
+                    print("[+] Error in get_public_IPs: %s" % (e,) )
         except Exception as e:
-            print "[+] Error in get_public_IPs: %s" % (e,) 
+            print("[+] Error in get_public_IPs: %s" % (e,) )
 
         return ip_list
 
@@ -80,10 +80,10 @@ class PacketParser:
                                     urls.append(unicode(url_host + http.uri, errors='replace'))
                                 except Exception as e:
                                     pass
-                                    #print "[-] Some error occured. - %s" % str(e)
+                                    #print("[-] Some error occured. - %s" % str(e))
 
         except Exception as e:
-            print "[-] Error in geturl() : %s " % (e,)
+            print("[-] Error in geturl() : %s " % (e,))
         return urls
 
     def get_dns_requests(self,protocols = ['TCP','UDP']):
@@ -109,7 +109,7 @@ class PacketParser:
                                     try:
                                         dns = dpkt.dns.DNS(tcp.data)
                                     except:
-                                        #print "Error:DNS"
+                                        #print("Error:DNS")
                                             continue # Discard errornous Data
                                     if dns.qr == dpkt.dns.DNS_R and dns.opcode == dpkt.dns.DNS_QUERY and dns.rcode == dpkt.dns.DNS_RCODE_NOERR:
                                         if len(dns.an) >= 1:
@@ -120,13 +120,13 @@ class PacketParser:
                                                 elif answer.type == 5:  # "CNAME request"
                                                     req = {'type': 'CN', 'name': unicode(answer.name, errors='replace'),'result': unicode(answer.cname, errors='replace')}
                                                 elif answer.type == 12:
-                                                         #print "PTR request", answer.name, "\tresponse", answer.ptrn
+                                                         #print("PTR request", answer.name, "\tresponse", answer.ptrn)
                                                     req = {'type': 'PTR', 'name': unicode(answer.name, errors='replace'),'result': unicode(answer.ptrname, errors='replace')}
-                                                if req <> {} : dns_list.append(req)
+                                                if req is {} : dns_list.append(req)
                 except Exception as e:
-                    print "[-] Error in get_dns_request() : %s " % (e,) 
+                    print("[-] Error in get_dns_request() : %s " % (e,) )
         except Exception as e:
-            print "[-] Error in get_dns_request() : %s " % (e,)           
+            print("[-] Error in get_dns_request() : %s " % (e,)           )
         return dns_list    
 
 
@@ -135,8 +135,8 @@ if __name__ == "__main__":
         import os.path
         if os.path.isfile(sys.argv[1]):
             pparse = PacketParser(sys.argv[1])
-            print pparse.get_urls()
-            print pparse.get_dns_requests()
-            print pparse.get_network_connections()
+            print(pparse.get_urls())
+            print(pparse.get_dns_requests())
+            print(pparse.get_network_connections())
     else:
-        print "Usage: packetparser.py mypcapcapture.pcap"
+        print("Usage: packetparser.py mypcapcapture.pcap")

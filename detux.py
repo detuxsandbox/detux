@@ -7,6 +7,7 @@
 # Import Detux packages
 from core.sandbox import Sandbox
 from core.report import Report
+from core.objects import SandboxRun, Hypervisor
 
 # import other python packages
 import json
@@ -20,7 +21,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,)
     parser.add_argument('--sample', help = "Sample path", required=True, dest='sample_path')
-    parser.add_argument('--cpu',  help = "CPU type", choices = ['x86', 'x86-64', 'arm', 'mips', 'mipsel'], default = 'auto', dest='cpu')
+    parser.add_argument('--cpu',  help = "CPU type", choices = ['x64'], default = 'auto', dest='cpu')
     parser.add_argument('--int',  help = "Architecture type", choices = ['python', 'perl', 'sh', 'bash'], default = None, dest='interpreter')
     parser.add_argument('--timeout',  help = "Set sample runtime", type=int, default = None, required=False, dest='timeout')
     parser.add_argument('--report', help = "JSON report output path",  required=True, dest='report_path')
@@ -30,27 +31,29 @@ if __name__ == "__main__":
     cpu = ""
 
     print("> Processing", args.sample_path)
+    print("> Args:", args.sample_args)
+
     
-    # Process the sample with sandbox
+
     sandbox = Sandbox(config_file)
 
-    print("> Args:", args.sample_args)
-    
-    if args.cpu == 'auto':
-        filetype, platform = sandbox.identify_platform(self.sample_path)
-        print("> CPU:", args.platform)
-        cpu = platform
-    else:
-        cpu = args.cpu
+    #print(sandbox.sandboxes)
+    print(sandbox.get_sandbox_by_arch("x64"))
+#    samplerun = SandboxRun(args.sample_path, args.sample_args, args.cpu, args.timeout)
 
-    print("> CPU:", cpu )
-    print("> Interpreter:", args.interpreter)
+#    print("> CPU:", samplerun.platform)
+#    print("> FileType:", samplerun.filetype)
+#
+#    print("> Interpreter:", args.interpreter)
     #IN:   sandbox.execute( FILEPATH, CPU PLATFORM, SANDBOX_ID, INTERPRETER, TIMEOUT)
     #OUT:  dict(REPORT)
+
+
+#    hypervisor = Hypervisor()
  
 
 
-    result = sandbox.execute(args.sample_path, args.sample_args, cpu, '1', args.interpreter, args.timeout)
+#    result = sandbox.execute(samplerun)
 
 #    print("> Generating report")
 #    # Retrive the report and  Process the sanbox result to prepare a DICT report
