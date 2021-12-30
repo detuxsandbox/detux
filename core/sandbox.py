@@ -9,8 +9,9 @@ import os
 import time
 import random
 import paramiko
+
 from configparser import ConfigParser
-from core.objects import Hypervisor, ExecutionResults
+from core.objects import Hypervisor, PCAPHandler
 
 
 
@@ -56,6 +57,15 @@ class Linux_SandboxHandler(object):
             print("[+] Error in scp: %s" % (e,)   )
 
         return False
+
+    def download(self, src_file, dst_file):
+        try:
+            self.sftp.get(src_file, dst_file)
+            return True
+        except Exception as e:
+            print("[+] Error in scp: %s" % (e,)   )
+
+        return False        
 
     def list_procs(self):
         try:
@@ -127,11 +137,10 @@ class Sandbox:
                     opt.append(self.hypervisor.vms[s])
         return opt        
 
-    def run(self, sample):
+    def run(self, sample, results):
         print("> Starting... ")
 
         target_env = None
-        results = ExecutionResults()
         target_env_list = self.select_environment(sample)
         for target_env in target_env_list:
             res = target_env.connect()
@@ -167,6 +176,14 @@ class Sandbox:
         elif target_env.os == "windows":
             print("TODO")
 
+        ## Start Network Capture
+        ph = PCAPHandler()
+        return
+
+
+
+
+
 
         ### Start Sandboxing
         print("> Go Time!")
@@ -177,8 +194,17 @@ class Sandbox:
 
         # TODO - Don't rely on timeout
         print("START!")
-        results.execution_log = conn.exec("nohup /sample > /dev/null 2>&1 >> /var/log/runlog &")
-        print("STOP!")
+        sample.start()
+        conn.exec("nohup /sample > /dev/null 2>&1 >> /var/log/runlog &")
+        print("STARTED!")
+
+        while sample.endtime > int(time.time()):
+            time.sleep(1)
+
+        print("Stopped!")
+        sample.stop()
         print(results.execution_log)
+        conn.download("/var/log/runlog", "{}/runlog".format(results.report_dir))
+
 
         end_ps = conn.list_procs()

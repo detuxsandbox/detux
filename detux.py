@@ -20,13 +20,13 @@ config_file = "detux.cfg"
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,)
-    parser.add_argument('--sample', help = "Sample path", required=True, dest='sample_path')
-    parser.add_argument('--cpu',  help = "CPU type", choices = ['x64'], default = 'auto', dest='cpu')
-    parser.add_argument('--os',  help = "Operating System type", choices = ['windows', 'linux'], default = 'auto', dest='os')    
-    parser.add_argument('--int',  help = "Architecture type", choices = ['python', 'perl', 'sh', 'bash'], default = None, dest='interpreter')
-    parser.add_argument('--timeout',  help = "Set sample runtime", type=int, default = None, required=False, dest='timeout')
-    parser.add_argument('--report', help = "JSON report output path",  required=True, dest='report_path')
-    parser.add_argument('--arguments', help = "Sample Arguments",  required=False, dest='sample_args')
+    parser.add_argument('--sample', help= "Sample path", required=True, dest='sample_path')
+    parser.add_argument('--cpu',  help= "CPU type", choices= ['x64'], default= 'auto', dest='cpu')
+    parser.add_argument('--os',  help= "Operating System type", choices= ['windows', 'linux'], default= 'auto', dest='os')    
+    parser.add_argument('--int',  help= "Architecture type", choices= ['python', 'perl', 'sh', 'bash'], default= None, dest='interpreter')
+    parser.add_argument('--timeout',  help= "Set sample runtime", type=int, default= 300, required=False, dest='timeout')
+    parser.add_argument('--report', help= "JSON report output path",  required=True, dest='report_path')
+    parser.add_argument('--arguments', help= "Sample Arguments",  required=False, dest='sample_args')
 
     args = parser.parse_args()
     cpu = ""
@@ -43,7 +43,8 @@ if __name__ == "__main__":
     # Setup our Sandbox handle
     sandbox = Sandbox(config_file, hypervisor)
 
-
+    # Setup report handle
+    report = Report(samplerun)
 
     print("> CPU:", samplerun.platform)
     print("> FileType:", samplerun.filetype)
@@ -56,7 +57,7 @@ if __name__ == "__main__":
 #    print(hypervisor.list_vms())
 
 
-    result = sandbox.run(samplerun)
+    result = sandbox.run(samplerun, report)
 
 #    print("> Generating report")
 #    # Retrive the report and  Process the sanbox result to prepare a DICT report

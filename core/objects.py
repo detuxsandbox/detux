@@ -2,31 +2,48 @@
 # Copyright (c) 2021 Silas Cutler, silas.cutler@gmail.com (https://silascutler.com/)
 # See the file 'COPYING' for copying permission.
 
-import sys
+import os
 import re
+import sys
+import time
 import libvirt
 import logging
+import threading
+import subprocess
+
+import hashlib
 from magic import Magic
 
 from core.common import new_logger
 
 log = new_logger("objects")
 
-class ExecutionResults(object):
-    def __init__(self):
-        self.uniq_procs = []
-        self.execution_log = ""
-        pass
+class PCAPHandler(object):
+    def __init__(self, interval=1):
+        self.run()
+        # self.interval = interval
+        # thread = threading.Thread(target=self.run, args=())
+        # thread.daemon = True
+        # thread.start()
 
-    def process_results(self, start, end):
-        print("diff start-end") #TODO
-        self.uniq_procs = []
+    def run(self):
+        # cmd = "tcpdump -nn -i {INTERFACE} -w {REPORT_PCAP} ether host {HWADDR}"
+        cmd = "tcpdump -nn -i {INTERFACE} -w {REPORT_PCAP}".format(INTERFACE="virbr0", REPORT_PCAP="./test.pcap")
+        print(subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid))
+          
+        # while True:
+        # More statements comes here
+        # print(datetime.datetime.now().__str__() + ' : Start task in the background')
+
+        # time.sleep(self.interval)
+
 
 
 
 class SandboxRun(object):
     def __init__(self, filepath, args, platform, os, timeout):
         self.filepath = filepath
+        self.hashes = self.hashfile()
         self.args = args
 
         if platform == "auto":
@@ -41,10 +58,25 @@ class SandboxRun(object):
             self.os = os
 
 
-        self.starttime = None
-        self.endtime = None
+        self.starttime = None # When the sample started
+        self.stoptime = None # When the sample stopped
+        self.endtime = None # When the sample should stop
+
         self.timeout = timeout
 
+    def hashfile(self):
+        return {
+            "md5": hashlib.md5(open(self.filepath,'rb').read()).hexdigest(),
+            "sha1": hashlib.sha1(open(self.filepath,'rb').read()).hexdigest(),
+            "sha256": hashlib.sha256(open(self.filepath,'rb').read()).hexdigest()
+        }
+
+    def start(self):
+        self.starttime = int(time.time())
+        self.endtime = self.starttime + self.timeout
+
+    def stop(self):
+        self.endtime = int(time.time())
 
 
     def identify_arch(self, filepath):
