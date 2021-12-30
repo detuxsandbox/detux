@@ -22,7 +22,6 @@ class Hypervisor(object):
         except libvirt.libvirtError:
             log.error('Failed to open connection to the hypervisor')
             sys.exit(1)
-        self.generate_dhcp_mapping()
         
     def lookup(self, name):
         try:

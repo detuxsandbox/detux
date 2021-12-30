@@ -7,24 +7,26 @@ import time
 
 class Report:
     def __init__(self, samplerun):
-        self.samplerun = samplerun
-        self.hashes = samplerun.hashes
+        #self.samplerun = samplerun
+        #self.hashes = samplerun.hashes
 
-        self.report_dir = "./reports/{}-{}".format(int(time.time()), self.hashes['sha256'])
+        #self.report_dir = "./reports/{}-{}".format(int(time.time()), self.hashes['sha256'])
 
         self.report = {}
         self.new_processes = []
         self.ended_processes = []
-        self.setup()
+        self.execution_log = ""
 
-        print("> Report Dir: {}".format(self.report_dir))
+        #self.setup()
+
+       # print("> Report Dir: {}".format(self.report_dir))
 
     def setup(self):
         if not os.path.isdir(self.report_dir):
             os.mkdir(self.report_dir)
 
 
-    def process_ps_results(self, ps1, ps2):
+    def process_ps_results(self, start, end):
         print("diff start-end") #TODO
         s_ps1 = ps1.split('\n')
         s_ps2 = ps2.split('\n')
@@ -39,6 +41,16 @@ class Report:
 
         print(self.new_processes)
         print(self.ended_processes)
+        
 
-    def generate_report(self):
-        print("> Generating Report...")
+
+
+if __name__ == "__main__":
+    r = Report(None)
+
+
+    ps1 = open('ps1').read()
+    ps2 = open('ps2').read()
+
+
+    r.process_ps_results(ps1, ps2)

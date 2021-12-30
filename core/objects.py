@@ -9,6 +9,7 @@ import time
 import libvirt
 import logging
 import threading
+import signal
 import subprocess
 
 import hashlib
@@ -19,25 +20,28 @@ from core.common import new_logger
 log = new_logger("objects")
 
 class PCAPHandler(object):
-    def __init__(self, interval=1):
-        self.run()
-        # self.interval = interval
-        # thread = threading.Thread(target=self.run, args=())
-        # thread.daemon = True
-        # thread.start()
-
-    def run(self):
-        # cmd = "tcpdump -nn -i {INTERFACE} -w {REPORT_PCAP} ether host {HWADDR}"
-        cmd = "tcpdump -nn -i {INTERFACE} -w {REPORT_PCAP}".format(INTERFACE="virbr0", REPORT_PCAP="./test.pcap")
-        print(subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid))
-          
-        # while True:
-        # More statements comes here
-        # print(datetime.datetime.now().__str__() + ' : Start task in the background')
-
-        # time.sleep(self.interval)
+    def __init__(self, report, target_env):
+        self.active = False
+        self.report_pcap = "{}/report.pcap".format(report.report_dir)
+        self.interface = target_env.dhcp.get('iface', None)
 
 
+    def start(self):
+        if self.interface == None:
+            print("No interface!")
+            self.start()
+        print("> Starting Network Logging")
+        cmd = "tcpdump -nn -i {INTERFACE} -w {REPORT_PCAP}".format(INTERFACE=self.interface, REPORT_PCAP=self.report_pcap)
+        self.handle = subprocess.Popen(cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            preexec_fn=os.setsid
+            )
+
+    def stop(self):
+        os.killpg(os.getpgid(self.handle.pid), signal.SIGTERM)
+        #self.handle.kill()
 
 
 class SandboxRun(object):
@@ -71,11 +75,11 @@ class SandboxRun(object):
             "sha256": hashlib.sha256(open(self.filepath,'rb').read()).hexdigest()
         }
 
-    def start(self):
+    def mark_start(self):
         self.starttime = int(time.time())
         self.endtime = self.starttime + self.timeout
 
-    def stop(self):
+    def mark_end(self):
         self.endtime = int(time.time())
 
 
@@ -96,11 +100,7 @@ class SandboxRun(object):
 
         if filetype.startswith("PE32"):
             if "x86-64" in filetype:
-                return filetype, "x64", "windows"                
-
-
-
-
+                return filetype, "x64", "windows"
         return filetype, "UNK", "UNK"
 
 
@@ -128,7 +128,7 @@ class Hypervisor(object):
             vm = _.split("_")
             if vm[0] == "detuxng":
                 self.vms[_] = VM(self, _ ,vm[1],vm[2], vm[3])
-        
+
     def lookup(self, name):
         try:
             host = self.conn.lookupByName(name)
@@ -148,7 +148,7 @@ class Hypervisor(object):
                     'clientid' : lease.get('clientid', "UNKN"),
                     'hostname' : lease.get('hostname', "UNKN"),
                 }
-                
+
 
 class VM(Hypervisor):
     def __init__(self, hypervisor, name, arch, os, os_version):
@@ -159,6 +159,8 @@ class VM(Hypervisor):
         self.os = os
         self.os_version = os_version
         self.ready = False
+        self.ipaddr = False
+        self.dhcp = False
 
         self.username = None
         self.password = None
@@ -167,30 +169,47 @@ class VM(Hypervisor):
     def connect(self):
         self.handle = self.lookup(self.name)
         print(">> Connecting to : {}".format(self.name))
-        self.restore_snapshot()
-        state, note = self.get_state()
-        print(">>> Status: {} ({})".format(state, note))
-        if state != 1:
-            return False
-
-        # Lookup IP address for machine
-        for hwaddr in re.search(r"<mac address='([A-Za-z0-9:]+)'", self.handle.XMLDesc()).groups(1):
-            if hwaddr not in self.hypervisor.dhcp:
-                return False
-            
-            self.ipaddr = self.hypervisor.dhcp[hwaddr].get('ipaddr', False)
-            self.dhcp = self.hypervisor.dhcp[hwaddr]
-
-            if self.ipaddr is False:
+        self.poweron()
+        time.sleep(5)
+        # Wait for power-on
+        while True:
+            state, note = self.get_state()
+            print(">>> Status: {} ({})".format(state, note))
+            if state != 1:
                 return False
 
+            # Lookup IP address for machine
+            for hwaddr in re.search(r"<mac address='([A-Za-z0-9:]+)'", self.handle.XMLDesc()).groups(1):
+
+                self.ipaddr = self.hypervisor.dhcp[hwaddr].get('ipaddr', False)
+                self.dhcp = self.hypervisor.dhcp[hwaddr]
+
+            # Break out if we have DHCP
+            if self.dhcp == False or self.ipaddr == False:
+                print("Waiting on network...")
+                time.sleep(10)
+            else:
+                return True
 
         return True
 
-
-
     def restore_snapshot(self):
         self.handle.revertToSnapshot(self.handle.snapshotCurrent())
+
+    def poweron(self):
+#        print(self.get_state())
+        self.restore_snapshot()
+#        time.sleep(2)
+        self.handle.create()
+#        time.sleep(5)
+        return True
+
+    # Not working yet
+    def shutdown(self):
+        self.restore_snapshot()
+        if self.get_state() == libvirt.VIR_DOMAIN_RUNNING:
+            self.handle.shutdown()
+
 
     def get_state(self):
         note = ""
@@ -212,7 +231,7 @@ class VM(Hypervisor):
         elif state == libvirt.VIR_DOMAIN_PMSUSPENDED:
             note = 'VIR_DOMAIN_PMSUSPENDED'
         else:
-            note = 'Unknown'                
+            note = 'Unknown'
         return state, note
 
 

@@ -12,6 +12,8 @@ DetuxNG is a sandbox developed to do magic
 
 1: Create Virtual Machines
  - Bash scripts will do net installs
+ - power off vm
+ - take snapshot
 
 2: Verify working
  - virsh list --all              # List VMs

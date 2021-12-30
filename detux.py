@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
     print("> Processing", args.sample_path)
     print("> Args:", args.sample_args)
+    print("> Timeout:", args.timeout)
 
     # Setup our sample run 
     samplerun = SandboxRun(args.sample_path, args.sample_args, args.cpu, args.os, args.timeout)
