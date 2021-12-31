@@ -19,6 +19,8 @@ class Report:
         self.report = {}
         self.new_processes = []
         self.ended_processes = []
+        self.new_hashes = []
+        self.deleted_hashes = []
         self.setup()
 
         self.log.info("> Report Dir: {}".format(self.report_dir))
@@ -42,6 +44,25 @@ class Report:
 
 #        print(self.new_processes)
 #        print(self.ended_processes)
+
+    def process_fs_results(self, s_fs1, s_fs2):
+        print("<fs>")
+        print(str(s_fs1)[:25])
+        print(str(s_fs2)[:25])
+
+        for p_post in [i for i in s_fs2 if i not in s_fs1 ]:
+            rec = p_post.lstrip().split(' ')
+            self.new_hashes.append(rec)
+
+        for p_pre in [i for i in s_fs1 if i not in s_fs2 ]:
+            rec = p_post.lstrip().split(' ')
+            self.deleted_hashes.append(rec)
+
+
+        print(self.new_hashes)
+        print(self.deleted_hashes)
+        print("</fs>")
+
 
     def generate_report(self):
         print("> Generating Report...")

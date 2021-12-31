@@ -172,6 +172,13 @@ class VM(Hypervisor):
         self.username = None
         self.password = None
         self.port = None
+        self.drive_path = self.get_drive_path()
+
+    def get_drive_path(self):
+        self.handle = self.lookup(self.name)
+        #<\'/var/lib/libvirt/images/detuxng_x64_ubuntu_2004.qcow2\'/
+        for drive_path in re.search(r"<source file='(.+?)'", self.handle.XMLDesc()).groups(1):
+            return drive_path
 
     def connect(self):
         self.handle = self.lookup(self.name)
@@ -215,6 +222,12 @@ class VM(Hypervisor):
 
     # Not working yet
     def shutdown(self):
+        self.restore_snapshot()
+        if self.get_state() == libvirt.VIR_DOMAIN_RUNNING:
+            self.handle.shutdown()
+
+    # Not working yet
+    def reset(self):
         self.restore_snapshot()
         if self.get_state() == libvirt.VIR_DOMAIN_RUNNING:
             self.handle.shutdown()

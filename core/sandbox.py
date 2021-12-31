@@ -12,6 +12,7 @@ import paramiko
 
 from configparser import ConfigParser
 from core.objects import Hypervisor, PCAPHandler
+from core.analyzer import hash_filesystem
 
 from core.common import new_logger
 
@@ -164,7 +165,10 @@ class Sandbox:
         target_env = None
         target_env_list = self.select_environment(sample)
         for target_env in target_env_list:
+            start_disk_hashes = hash_filesystem(target_env.drive_path)
+
             res = target_env.connect()
+
 
             # TODO: Testing
             if res == False:
@@ -219,12 +223,14 @@ class Sandbox:
         # Start Cleanup.  Shutdown sandbox, Mark execution completion time, stop network logging and download runlog
         sample.mark_end()
         ph.stop()
+
         results.process_ps_results(start_ps, conn.list_procs())
-        conn.download("/var/log/runlog", "{}/runlog".format(results.report_dir))
-        
+
+        results.process_fs_results(start_disk_hashes, hash_filesystem(target_env.drive_path))
 
         self.log.info("> Finished Execution")
+        target_env.shutdown()
 
         
-        target_env.shutdown()
+        target_env.reset()
 

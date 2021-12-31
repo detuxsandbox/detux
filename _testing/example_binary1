@@ -1,3 +1,6 @@
 #!/bin/bash
 wget http://yahoo.com
+ps faux > /misc_file
+echo "TESTTEST"> /etc/testfile
 ping 8.8.8.8
+

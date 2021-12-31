@@ -52,9 +52,7 @@ if __name__ == "__main__":
 
 
 
-import kvm_testing
-k = kvm_testing.Hypervisor()
-host = k.lookup("detuxng_x64_ubuntu_2004")
+
 # 
 # 
 
