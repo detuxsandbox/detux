@@ -1,7 +1,6 @@
 qemu
 qemu/**
 reports/**
-**
 *.iso
 *.qcow2
 __pycache__/
