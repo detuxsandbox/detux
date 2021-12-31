@@ -9,6 +9,10 @@ from core.sandbox import Sandbox
 from core.report import Report
 from core.objects import SandboxRun, Hypervisor
 
+from core.common import new_logger
+
+log = new_logger("main")
+
 # import other python packages
 import json
 import sys
@@ -31,9 +35,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cpu = ""
 
-    print("> Processing", args.sample_path)
-    print("> Args:", args.sample_args)
-    print("> Timeout:", args.timeout)
+    log.info("> Processing: {}".format(args.sample_path))
+    log.info("> Args: {}".format(args.sample_args))
+    log.info("> Timeout: {}".format(args.timeout))
 
     # Setup our sample run 
     samplerun = SandboxRun(args.sample_path, args.sample_args, args.cpu, args.os, args.timeout)
@@ -47,20 +51,20 @@ if __name__ == "__main__":
     # Setup report handle
     report = Report(samplerun)
 
-    print("> CPU:", samplerun.platform)
-    print("> FileType:", samplerun.filetype)
+    log.info("> CPU: {}".format(samplerun.platform))
+    log.info("> FileType: {}".format(samplerun.filetype))
 #
-#    print("> Interpreter:", args.interpreter)
+#    log.info("> Interpreter:", args.interpreter)
     #IN:   sandbox.execute( samplerun )
     #OUT:  dict(REPORT)
 
 
-#    print(hypervisor.list_vms())
+#    log.info(hypervisor.list_vms())
 
 
     result = sandbox.run(samplerun, report)
 
-#    print("> Generating report")
+#    log.info("> Generating report")
 #    # Retrive the report and  Process the sanbox result to prepare a DICT report
 #    reporter =  Report(args.sample_path, result)
 #    report = reporter.get_report()
@@ -71,7 +75,7 @@ if __name__ == "__main__":
 #    with open(args.report_path, 'w') as f:
 #        f.write(json_report)
 #    
-#    print("> Report written to", args.report_path    )
+#    log.info("> Report written to {}".format(args.report_path ))
     
 
 

@@ -13,6 +13,8 @@ import paramiko
 from configparser import ConfigParser
 from core.objects import Hypervisor, PCAPHandler
 
+from core.common import new_logger
+
 
 
 
@@ -20,6 +22,7 @@ from core.objects import Hypervisor, PCAPHandler
 # SSH (using paramiko).  This object will also hold basic introspection functionality.
 class Linux_SandboxHandler(object):
     def __init__(self, host, port, username, password):
+        self.log = new_logger("Linux_SandboxHandler")
         self.host = host
         self.port = port
         self.username = username
@@ -43,10 +46,10 @@ class Linux_SandboxHandler(object):
                 self.sftp = self.ssh.open_sftp()
                 return True     
             except Exception as e:
-                #print(e)
+                #self.log.error(e)
                 tries -= 1
                 time.sleep(5)
-        print(e)
+        self.log.error(e)
         return False
 
     # exec() will run remote commands on the sandbox using ssh.
@@ -57,8 +60,8 @@ class Linux_SandboxHandler(object):
             stdin, stdout, stderr  = self.ssh.exec_command(commands, timeout=timeout)
             result = "".join(stdout.readlines()+ stderr.readlines())
         except Exception as e:
-            print(e)
-            print("[+] Error in ssh_execute: %s" % (e,))
+            self.log.error(e)
+            self.log.error("[+] Error in ssh_execute: %s" % (e,))
             return None
         return result
 
@@ -68,7 +71,7 @@ class Linux_SandboxHandler(object):
             self.sftp.put(src_file, dst_file)
             return True
         except Exception as e:
-            print("[+] Error in scp: %s" % (e,)   )
+            self.log.error("[+] Error in scp: %s" % (e,)   )
 
         return False
 
@@ -78,7 +81,7 @@ class Linux_SandboxHandler(object):
             self.sftp.get(src_file, dst_file)
             return True
         except Exception as e:
-            print("[+] Error in scp: %s" % (e,)   )
+            self.log.error("[+] Error in scp: %s" % (e,)   )
 
         return False        
 
@@ -88,13 +91,14 @@ class Linux_SandboxHandler(object):
         try:
             return self.exec("ps -Ao pid,comm")
         except Exception as e:
-            print("[+] Error in listproc: %s" % (e,)   )
+            self.log.error("[+] Error in listproc: %s" % (e,)   )
 
         return False
 
 # Sandbox defines the core object of DetuxNG.  
 class Sandbox:
     def __init__(self, config_path, hypervisor):
+        self.log = new_logger("Sandbox")        
         self.config = ConfigParser()
         self.config.read(config_path)
 
@@ -155,7 +159,7 @@ class Sandbox:
         return opt        
 
     def run(self, sample, results):
-        print("> Starting... ")
+        self.log.info("> Starting... ")
 
         target_env = None
         target_env_list = self.select_environment(sample)
@@ -164,20 +168,20 @@ class Sandbox:
 
             # TODO: Testing
             if res == False:
-                print("X Unable to setup ", target_env.name)
+                self.log.error("X Unable to setup {}".format(target_env.name))
                 target_env.ready = False
             else:
                 target_env.ready = True
                 break
 
-        print("> Run in: {} (arch: {}, os: {}, ip: {}) ".format(
+        self.log.info("> Run in: {} (arch: {}, os: {}, ip: {}) ".format(
             target_env.name, 
             target_env.arch, 
             target_env.os,
             target_env.ipaddr))
 
         if target_env.env == "linux":
-            print(">> Starting connection test")
+            self.log.info(">> Starting connection test")
             conn = Linux_SandboxHandler(
                 target_env.ipaddr, 
                 target_env.port,
@@ -191,7 +195,7 @@ class Sandbox:
                 return False
 
         elif target_env.os == "windows":
-            print("TODO")
+            self.log.error("TODO: windows")
 
         ## Start Network Capture
         ph = PCAPHandler(results, target_env)
@@ -199,7 +203,7 @@ class Sandbox:
 
         # Start Sandboxing.  List processes before start, upload sample, mark executabe and 
         #  call conn.exec() to run the sample
-        print("> Go Time!")
+        self.log.info("> Go Time!")
         start_ps = conn.list_procs()
         conn.upload(sample.filepath, "/sample")
         conn.exec("chmod +x /sample")
@@ -210,7 +214,7 @@ class Sandbox:
 
         while sample.endtime > int(time.time()):
             time.sleep(1)
-        print("> Runtime finished")
+        self.log.info("> Runtime finished")
 
         # Start Cleanup.  Shutdown sandbox, Mark execution completion time, stop network logging and download runlog
         sample.mark_end()
@@ -219,7 +223,7 @@ class Sandbox:
         conn.download("/var/log/runlog", "{}/runlog".format(results.report_dir))
         
 
-        print("> Finished Execution")
+        self.log.info("> Finished Execution")
 
         
         target_env.shutdown()

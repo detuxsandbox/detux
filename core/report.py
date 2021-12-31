@@ -5,8 +5,12 @@
 import os
 import time
 
+from core.common import new_logger
+
 class Report:
     def __init__(self, samplerun):
+        self.log = new_logger("Hypervisor")
+
         self.samplerun = samplerun
         self.hashes = samplerun.hashes
 
@@ -17,15 +21,14 @@ class Report:
         self.ended_processes = []
         self.setup()
 
-        print("> Report Dir: {}".format(self.report_dir))
+        self.log.info("> Report Dir: {}".format(self.report_dir))
 
     def setup(self):
         if not os.path.isdir(self.report_dir):
-            os.mkdir(self.report_dir)
+            os.mkdir(self.report_dir) #TODO: mkdir -p
 
 
     def process_ps_results(self, ps1, ps2):
-        print("diff start-end") #TODO
         s_ps1 = ps1.split('\n')
         s_ps2 = ps2.split('\n')
         for p_post in [i for i in s_ps2 if i not in s_ps1 ]:
@@ -37,8 +40,8 @@ class Report:
             self.ended_processes.append(rec)
 
 
-        print(self.new_processes)
-        print(self.ended_processes)
+#        print(self.new_processes)
+#        print(self.ended_processes)
 
     def generate_report(self):
         print("> Generating Report...")

@@ -17,10 +17,10 @@ from magic import Magic
 
 from core.common import new_logger
 
-log = new_logger("objects")
 
 class PCAPHandler(object):
     def __init__(self, report, target_env):
+        self.log = new_logger("PCAPHandler")
         self.active = False
         self.report_pcap = "{}/report.pcap".format(report.report_dir)
         self.interface = target_env.dhcp.get('iface', None)
@@ -28,9 +28,10 @@ class PCAPHandler(object):
 
     def start(self):
         if self.interface == None:
-            print("No interface!")
+            self.log.error("No interface!")
             self.start()
-        print("> Starting Network Logging")
+
+        self.log.info("> Starting Network Logging")
         cmd = "tcpdump -nn -i {INTERFACE} -w {REPORT_PCAP}".format(INTERFACE=self.interface, REPORT_PCAP=self.report_pcap)
         self.handle = subprocess.Popen(cmd,
             shell=True,
@@ -46,6 +47,8 @@ class PCAPHandler(object):
 
 class SandboxRun(object):
     def __init__(self, filepath, args, platform, os, timeout):
+        self.log = new_logger("SandboxRun")
+
         self.filepath = filepath
         self.hashes = self.hashfile()
         self.args = args
@@ -106,13 +109,15 @@ class SandboxRun(object):
 
 class Hypervisor(object):
     def __init__(self, sconn='qemu:///system'):
+        self.log = new_logger("Hypervisor")
+
         self.vms = {}
         self.dhcp = {}
         try:
             self.conn = libvirt.open(sconn)
             self.list_vms()
         except libvirt.libvirtError:
-            log.error('Failed to open connection to the hypervisor')
+            self.log.error('Failed to open connection to the hypervisor')
             sys.exit(1)
         self.generate_dhcp_mapping()
 
@@ -133,7 +138,7 @@ class Hypervisor(object):
         try:
             host = self.conn.lookupByName(name)
         except libvirt.libvirtError:
-            log.error('Failed to find the main domain')
+            self.log.error('Failed to find the main domain')
             return None
         return host
 
@@ -142,6 +147,7 @@ class Hypervisor(object):
         for _ in self.network_names:
             net = self.conn.networkLookupByName(_)
             for lease in net.DHCPLeases():
+#                self.log.debug(lease)
                 self.dhcp[lease.get('mac', "UNKN")] = {
                     'ipaddr' : lease.get('ipaddr', "UNKN"),
                     'iface' : lease.get('iface', "UNKN"),
@@ -152,6 +158,7 @@ class Hypervisor(object):
 
 class VM(Hypervisor):
     def __init__(self, hypervisor, name, arch, os, os_version):
+        self.log = new_logger("Hypervisor_VM")
         self.hypervisor = hypervisor
         self.conn = self.hypervisor.conn
         self.name = name
@@ -168,25 +175,27 @@ class VM(Hypervisor):
 
     def connect(self):
         self.handle = self.lookup(self.name)
-        print(">> Connecting to : {}".format(self.name))
+        self.log.info(">> Connecting to : {}".format(self.name))
         self.poweron()
         time.sleep(5)
         # Wait for power-on
         while True:
             state, note = self.get_state()
-            print(">>> Status: {} ({})".format(state, note))
+            self.log.info(">>> Status: {} ({})".format(state, note))
             if state != 1:
                 return False
 
             # Lookup IP address for machine
             for hwaddr in re.search(r"<mac address='([A-Za-z0-9:]+)'", self.handle.XMLDesc()).groups(1):
-
-                self.ipaddr = self.hypervisor.dhcp[hwaddr].get('ipaddr', False)
-                self.dhcp = self.hypervisor.dhcp[hwaddr]
-
+                if hwaddr in self.hypervisor.dhcp:
+                    self.ipaddr = self.hypervisor.dhcp[hwaddr].get('ipaddr', False)
+                    self.dhcp = self.hypervisor.dhcp[hwaddr]
+                else:
+                    self.log.error("Error case - sleep and retry")
+                    continue
             # Break out if we have DHCP
             if self.dhcp == False or self.ipaddr == False:
-                print("Waiting on network...")
+                self.log.info("Waiting on network...")
                 time.sleep(10)
             else:
                 return True

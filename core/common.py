@@ -7,7 +7,8 @@ import logging
 def new_logger(name, level=logging.DEBUG):
     log = logging.getLogger(name)
     handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+#    formatter = logging.Formatter('%(asctime)s %(name)-20s %(levelname)-8s %(message)s')
+    formatter = logging.Formatter('%(name)-20s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)    
     log.addHandler(handler)
     log.setLevel(level)
