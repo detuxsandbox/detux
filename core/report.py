@@ -70,7 +70,7 @@ class Report:
 
         print("> Saving {} files".format(len(fList)))
 
-        save_files(disk_path, fList, self.report_dir + "/files")
+        save_files(disk_path, fList, self.report_dir + "/files/")
 
 
 

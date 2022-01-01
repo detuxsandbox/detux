@@ -74,10 +74,11 @@ def get_file(disk_path, filename):
 def save_files(disk_path, fList, folderPath):
     h = HostAnalzer_Linux(disk_path)
     fdata = None
+    print(folderPath)
     for filename in fList:
         if h.g.is_file(filename):
-            h.log.info("> Fetching %s" % filename)
-            with open(folderPath + "/files/" filename.replace('/', "_"), "wb") as w:
+            h.log.info("> Fetching %s - (%s)" % (filename, folderPath + filename.replace('/', "_")))
+            with open(folderPath + filename.replace('/', "_"), "wb") as w:
                 w.write(h.g.read_file(filename))
     h.close()
     return fdata
