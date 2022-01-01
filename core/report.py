@@ -3,6 +3,7 @@
 # See the file 'COPYING' for copying permission.
 
 import os
+import json
 import time
 
 from core.common import new_logger
@@ -71,20 +72,20 @@ class Report:
             self.samplerun.starttime, 
             self.samplerun.endtime)
         out += "-----------------\n"
-        out += "New Files"
+        out += "New Files\n"
         for new_file in self.new_hashes:
-            out += " - [{}] {}".format(new_file)
+            out += " - [{}] {}\n".format(new_file[0], new_file[1])
         out += "Deleted Files"            
         for del_file in self.deleted_hashes:
-            out += " - [{}] {}".format(del_file)
+            out += " - [{}] {}\n".format(del_file[0], del_file[1])
 
 
 
 
-        with open(self.report_dir + "report.txt", 'w') as w:
+        with open(self.report_dir + "/report.txt", 'w') as w:
             w.write(out)
 
-        with open(self.report_dir + "report.json", 'w') as w:
+        with open(self.report_dir + "/report.json", 'w') as w:
             w.write(json.dumps({
                 "files" : {
                     "new" : self.new_hashes,

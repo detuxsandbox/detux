@@ -159,6 +159,7 @@ class Sandbox:
         target_env = None
         target_env_list = self.select_environment(sample)
         for target_env in target_env_list:
+            target_env.restore_snapshot()
             start_disk_hashes = hash_filesystem(target_env.drive_path)
 
             res = target_env.connect()
