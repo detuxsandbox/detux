@@ -6,10 +6,11 @@ import os
 import time
 
 from core.common import new_logger
+from core.analyzer import HostAnalzer_Linux, save_files
 
 class Report:
     def __init__(self, samplerun):
-        self.log = new_logger("Hypervisor")
+        self.log = new_logger("Report")
 
         self.samplerun = samplerun
         self.hashes = samplerun.hashes
@@ -28,7 +29,8 @@ class Report:
     def setup(self):
         if not os.path.isdir(self.report_dir):
             os.mkdir(self.report_dir) #TODO: mkdir -p
-
+        if not os.path.isdir(self.report_dir + "/files"):
+            os.mkdir(self.report_dir + "/files") 
 
     def process_ps_results(self, ps1, ps2):
         s_ps1 = ps1.split('\n')
@@ -47,21 +49,30 @@ class Report:
 
     def process_fs_results(self, s_fs1, s_fs2):
         print("<fs>")
-        print(str(s_fs1)[:25])
-        print(str(s_fs2)[:25])
 
         for p_post in [i for i in s_fs2 if i not in s_fs1 ]:
-            rec = p_post.lstrip().split(' ')
+            rec = p_post.lstrip().split("-", 1)
             self.new_hashes.append(rec)
 
         for p_pre in [i for i in s_fs1 if i not in s_fs2 ]:
-            rec = p_post.lstrip().split(' ')
+            rec = p_post.lstrip().split("-", 1)
             self.deleted_hashes.append(rec)
 
 
         print(self.new_hashes)
         print(self.deleted_hashes)
         print("</fs>")
+
+    def pull_new_files(self, disk_path):
+        fList = []
+        for f in self.new_hashes:
+            fList.append(f[1])
+
+        print("> Saving {} files".format(len(fList)))
+
+        save_files(disk_path, fList, self.report_dir + "/files")
+
+
 
 
     def generate_report(self):

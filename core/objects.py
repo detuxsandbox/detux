@@ -188,6 +188,7 @@ class VM(Hypervisor):
         # Wait for power-on
         while True:
             state, note = self.get_state()
+            self.hypervisor.generate_dhcp_mapping()
             self.log.info(">>> Status: {} ({})".format(state, note))
             if state != 1:
                 return False
@@ -232,6 +233,9 @@ class VM(Hypervisor):
         if self.get_state() == libvirt.VIR_DOMAIN_RUNNING:
             self.handle.shutdown()
 
+    # 
+    def reboot(self):
+        self.handle.reboot()
 
     def get_state(self):
         note = ""

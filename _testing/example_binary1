@@ -4,3 +4,8 @@ ps faux > /misc_file
 echo "TESTTEST"> /etc/testfile
 ping 8.8.8.8
 
+touch /tmp/hello
+cp /etc/passwd /tmp
+rm /tmp/passwd
+touch /tmp/goodbye
+rm /tmp/hello /tmp/goodbye

@@ -37,8 +37,7 @@ for root in roots:
     filename = "/etc/issue.net"
     if g.is_file(filename):
         print("--- %s ---" % filename)
-        lines = g.head_n(3, filename)
-        for line in lines:
-            print(line)
+        lines = g.cat(filename)
+        print(lines)
 
     g.umount_all()

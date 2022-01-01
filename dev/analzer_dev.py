@@ -50,9 +50,7 @@ class HostAnalzer_Linux(object):
         for _ in self.g.find("/"):
             f = "/" + _
             if self.g.is_file(f):
-                
-                "{} - {}".format(
-                    self.g.checksum("md5", f), f)
+                "{} - {}".format(self.g.checksum("md5", f), f)
                 
         print("Done")
 

@@ -224,9 +224,15 @@ class Sandbox:
         sample.mark_end()
         ph.stop()
 
+        self.log.info("> Processing process diff")
         results.process_ps_results(start_ps, conn.list_procs())
 
+        self.log.info("> Processing file system diff")
         results.process_fs_results(start_disk_hashes, hash_filesystem(target_env.drive_path))
+
+        self.log.info("> Pulling new files")
+        results.pull_new_files(target_env.drive_path)
+
 
         self.log.info("> Finished Execution")
         target_env.shutdown()
