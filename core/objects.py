@@ -71,6 +71,13 @@ class SandboxRun(object):
 
         self.timeout = timeout
 
+    def get_exec_command(self):
+        if self.os == "linux":
+            return "chmod +x /sample && nohup /sample > /dev/null 2>&1 >> /var/log/runlog &"
+        else:
+            return "START /B /sample"
+
+
     def hashfile(self):
         return {
             "md5": hashlib.md5(open(self.filepath,'rb').read()).hexdigest(),
