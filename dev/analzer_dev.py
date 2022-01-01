@@ -2,9 +2,10 @@
 # Copyright (c) 2021 Silas Cutler, silas.cutler@gmail.com (https://silascutler.com/)
 # See the file 'COPYING' for copying permission.
 
+import os
+import re
 import sys
 import guestfs
-
 
 class HostAnalzer_Linux(object):
     def __init__(self, drivepath):
@@ -38,7 +39,7 @@ class HostAnalzer_Linux(object):
 
 
     def run(self):
-            filename = "/etc/issue.net"
+            filename = posix_path("/etc/issue.net")
             if self.g.is_file(filename):
                 print("--- %s ---" % filename)
                 lines = self.g.head_n(3, filename)
@@ -47,15 +48,29 @@ class HostAnalzer_Linux(object):
 
     def hash_filesystem(self):
         print("Hashing FS")
+        last = ""
+        f = ""
+        out = []
+        counter = 0
         for _ in self.g.find("/"):
+            counter += 1
             f = "/" + _
             if self.g.is_file(f):
-                "{} - {}".format(self.g.checksum("md5", f), f)
-                
+                try:
+                    out.append("{} - {}".format(self.g.checksum("md5", posix_path(f)), f))
+                except Exception as e:
+                    print(e)
+                    print(f)
+                    return
+
         print("Done")
 
     def close(self):
         self.g.umount_all()
+
+def posix_path(*segments):
+    return re.sub('^[a-zA-Z]:', '', os.path.join(*segments)).replace('\\', '/')
+
 
 if __name__ == "__main__":
 
@@ -65,5 +80,7 @@ if __name__ == "__main__":
     disk = sys.argv[1]
 
     h = HostAnalzer_Linux(disk)
+    #h.get_root_info()
     h.hash_filesystem()
     h.close()
+

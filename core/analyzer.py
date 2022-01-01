@@ -2,6 +2,8 @@
 # Copyright (c) 2021 Silas Cutler, silas.cutler@gmail.com (https://silascutler.com/)
 # See the file 'COPYING' for copying permission.
 
+import os
+import re
 import sys
 import guestfs
 
@@ -10,7 +12,7 @@ from core.common import new_logger
 
 class HostAnalzer_Linux(object):
     def __init__(self, drivepath):
-        self.log = new_logger("Report")
+        self.log = new_logger("HostAnalzer_Linux")
 
         self.g = guestfs.GuestFS(python_return_dict=True)
         self.g.add_drive_opts(drivepath, readonly=1)
@@ -55,7 +57,10 @@ class HostAnalzer_Linux(object):
         for _ in self.g.find("/"):
             f = "/" + _
             if self.g.is_file(f):
-                fs.append("{}-{}".format(self.g.checksum("md5", f), f))
+                try:
+                    fs.append("{}-{}".format(self.g.checksum("md5", posix_path(f)), f))
+                except Exception as e:
+                    print("Exception hashing: {} ({})".format(f, e))
                 
         return fs
 
@@ -73,17 +78,16 @@ def get_file(disk_path, filename):
 
 def save_files(disk_path, fList, folderPath):
     h = HostAnalzer_Linux(disk_path)
-    fdata = None
-    print(folderPath)
     for filename in fList:
         if h.g.is_file(filename):
             h.log.info("> Fetching %s - (%s)" % (filename, folderPath + filename.replace('/', "_")))
             with open(folderPath + filename.replace('/', "_"), "wb") as w:
                 w.write(h.g.read_file(filename))
     h.close()
-    return fdata
+    return True
 
-
+def posix_path(*segments):
+    return re.sub('^[a-zA-Z]:', '', os.path.join(*segments)).replace('\\', '/')
 
 def hash_filesystem(disk_path):
     h = HostAnalzer_Linux(disk_path)

@@ -44,12 +44,7 @@ class Report:
             self.ended_processes.append(rec)
 
 
-#        print(self.new_processes)
-#        print(self.ended_processes)
-
     def process_fs_results(self, s_fs1, s_fs2):
-        print("<fs>")
-
         for p_post in [i for i in s_fs2 if i not in s_fs1 ]:
             rec = p_post.lstrip().split("-", 1)
             self.new_hashes.append(rec)
@@ -59,9 +54,8 @@ class Report:
             self.deleted_hashes.append(rec)
 
 
-        print(self.new_hashes)
-        print(self.deleted_hashes)
-        print("</fs>")
+#        print(self.new_hashes)
+#        print(self.deleted_hashes)
 
     def pull_new_files(self, disk_path):
         fList = []
@@ -69,11 +63,48 @@ class Report:
             fList.append(f[1])
 
         print("> Saving {} files".format(len(fList)))
-
         save_files(disk_path, fList, self.report_dir + "/files/")
 
-
-
-
     def generate_report(self):
-        print("> Generating Report...")
+        out = "DetuxNG Sandbox Execution Report\n"
+        out += "Start: {} | End: {}\n".format(
+            self.samplerun.starttime, 
+            self.samplerun.endtime)
+        out += "-----------------\n"
+        out += "New Files"
+        for new_file in self.new_hashes:
+            out += " - [{}] {}".format(new_file)
+        out += "Deleted Files"            
+        for del_file in self.deleted_hashes:
+            out += " - [{}] {}".format(del_file)
+
+
+
+
+        with open(self.report_dir + "report.txt", 'w') as w:
+            w.write(out)
+
+        with open(self.report_dir + "report.json", 'w') as w:
+            w.write(json.dumps({
+                "files" : {
+                    "new" : self.new_hashes,
+                    "deleted": self.deleted_hashes},
+                "processes" : {
+                    "new" : self.new_processes,
+                    "ended": self.ended_processes},
+                "submitted": {
+                    "hashes": self.hashes}
+                }))
+
+
+
+
+
+
+
+
+
+
+
+
+

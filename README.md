@@ -15,6 +15,11 @@ DetuxNG is a sandbox developed to do magic
  - power off vm
  - take snapshot
 
+(Win10):
+    Enable SSH server
+    https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse
+    https://winaero.com/enable-openssh-server-windows-10/
+    
 2: Verify working
  - virsh list --all              # List VMs
  - virsh net-dhcp-leases default # Get IPs of hosts

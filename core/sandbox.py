@@ -30,10 +30,10 @@ class Linux_SandboxHandler(object):
         self.password = password
 
     # connect() establishes a connection to the sandbox using SSH and establish an SFTP 
-    #  session.  There is a built in retry counter (limited to 3 attempts).  The 
+    #  session.  There is a built in retry counter (limited to 5 attempts).  The 
     # resulting SSH handle is saved to self.ssh and the SFTP handle to self.sftp
     def connect(self):
-        tries = 3
+        tries = 5
         e = None
         while tries > 0:
             try:
@@ -47,10 +47,10 @@ class Linux_SandboxHandler(object):
                 self.sftp = self.ssh.open_sftp()
                 return True     
             except Exception as e:
-                #self.log.error(e)
+                self.log.error(e)
                 tries -= 1
-                time.sleep(5)
-        self.log.error(e)
+                time.sleep(10)
+        #self.log.error(e)
         return False
 
     # exec() will run remote commands on the sandbox using ssh.
@@ -73,7 +73,7 @@ class Linux_SandboxHandler(object):
             return True
         except Exception as e:
             self.log.error("[+] Error in scp: %s" % (e,)   )
-
+            return False
         return False
 
     # download() downloads a file using the sftp connection
@@ -125,13 +125,7 @@ class Sandbox:
             }
             #If value missing:
             if sandbox_config.get('port', True):
-                if self.sandboxes[s]['env'] == "linux":
-                    self.sandboxes[s]['port'] = 22
-
-                elif self.sandboxes[s]['env'] == "windows":
-                    self.sandboxes[s]['port'] = 445
-                else:
-                    continue
+                self.sandboxes[s]['port'] = 22
             else:
                 self.sandboxes[s]['port'] = sandbox_config.get('port')
 
@@ -174,6 +168,7 @@ class Sandbox:
             if res == False:
                 self.log.error("X Unable to setup {}".format(target_env.name))
                 target_env.ready = False
+                # Continue - Loop to try and different system
             else:
                 target_env.ready = True
                 break
@@ -184,7 +179,7 @@ class Sandbox:
             target_env.os,
             target_env.ipaddr))
 
-        if target_env.env == "linux":
+        if target_env.env == "linux" or target_env.os == "windows":
             self.log.info(">> Starting connection test")
             conn = Linux_SandboxHandler(
                 target_env.ipaddr, 
@@ -200,6 +195,7 @@ class Sandbox:
 
         elif target_env.os == "windows":
             self.log.error("TODO: windows")
+            return False
 
         ## Start Network Capture
         ph = PCAPHandler(results, target_env)
@@ -210,11 +206,10 @@ class Sandbox:
         self.log.info("> Go Time!")
         start_ps = conn.list_procs()
         conn.upload(sample.filepath, "/sample")
-        conn.exec("chmod +x /sample")
 
         # TODO - Don't rely on timeout
         sample.mark_start()
-        conn.exec("nohup /sample > /dev/null 2>&1 >> /var/log/runlog &")
+        conn.exec(sample.get_exec_command())
 
         while sample.endtime > int(time.time()):
             time.sleep(1)
@@ -225,7 +220,7 @@ class Sandbox:
         ph.stop()
 
         self.log.info("> Processing process diff")
-        results.process_ps_results(start_ps, conn.list_procs())
+#        results.process_ps_results(start_ps, conn.list_procs())
 
         self.log.info("> Processing file system diff")
         results.process_fs_results(start_disk_hashes, hash_filesystem(target_env.drive_path))
@@ -236,7 +231,6 @@ class Sandbox:
 
         self.log.info("> Finished Execution")
         target_env.shutdown()
-
-        
         target_env.reset()
+        results.generate_report()
 
