@@ -40,4 +40,4 @@ Following is a list of early developers and contributors that we'd like to thank
 - Rahul Binjve - Help in pcap parsing ([@c0dist](https://github.com/c0dist), [twitter](https://twitter.com/c0dist))
 - Amey Gat - Help in pcap parsing ([ameygat](https://github.com/ameygat), ameygat@gmail.com )
 - Thanks to Aurélien Jarno (@aurel32) (https://www.aurel32.net/) for the pre-built VM images.
-- Joe Stewart (@joestewart71) for developing Truman years ago and the immeasurable amount he's done. 
+- Joe Stewart (@joestewart71) for developing Truman years ago and the immeasurable amount he has  done. 
