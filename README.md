@@ -1,4 +1,7 @@
 # (Beta stage)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/silascutler/DetuxNG/graphs/commit-activity)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+
 
 ![Logo](detux.png)
 ## The Multiplatform Linux Sandbox
