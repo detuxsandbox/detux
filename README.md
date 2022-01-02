@@ -1,7 +1,10 @@
-# In Development // Not Working
+# (Beta stage)
 
 ![Logo](detux.png)
 ## The Multiplatform Linux Sandbox
+DetuxNG is a malware sandbox developed for daily use by analysts.  Based on QEMU and using SSH for system control, DetuxNG can support environments of multiple architectures (x86, x64, ARM, MIPS, etc) and operating systems (windows, linux, android).  
+
+DetuxNG is not designed for enterprise use. 
 
 
 ### Introduction:
@@ -15,6 +18,8 @@ DetuxNG is a sandbox developed to do magic
  - power off vm
  - take snapshot
 
+Detux requires specific machine name format
+
 (Win10):
     Enable SSH server
     https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse
@@ -25,11 +30,6 @@ DetuxNG is a sandbox developed to do magic
  - virsh net-dhcp-leases default # Get IPs of hosts
 
 3: Auto-generate config?
-
-
-
-
-
 
 
 
