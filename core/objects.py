@@ -24,7 +24,7 @@ class PCAPHandler(object):
         self.active = False
         self.report_pcap = "{}/report.pcap".format(report.report_dir)
         self.interface = target_env.dhcp.get('iface', None)
-
+        self.hwaddr = target_env.hwaddr
 
     def start(self):
         if self.interface == None:
@@ -32,7 +32,11 @@ class PCAPHandler(object):
             self.start()
 
         self.log.info("> Starting Network Logging")
-        cmd = "tcpdump -nn -i {INTERFACE} -w {REPORT_PCAP}".format(INTERFACE=self.interface, REPORT_PCAP=self.report_pcap)
+        cmd = "tcpdump -nn -i {INTERFACE} ether host {HWADDR} -w {REPORT_PCAP}".format(
+            INTERFACE=self.interface,
+            HWADDR=self.hwaddr,
+            REPORT_PCAP=self.report_pcap)
+        print(cmd)
         self.handle = subprocess.Popen(cmd,
             shell=True,
             stdout=subprocess.PIPE,
@@ -107,10 +111,13 @@ class SandboxRun(object):
         if filetype.startswith("ELF"):
             if "64-bit" in filetype:
                 return filetype, "x64", "linux"
+            return filetype, "x64", "linux"
 
         if filetype.startswith("PE32"):
             if "x86-64" in filetype:
                 return filetype, "x64", "windows"
+            return filetype, "x64", "windows"
+
         return filetype, "UNK", "UNK"
 
 
@@ -175,11 +182,13 @@ class VM(Hypervisor):
         self.ready = False
         self.ipaddr = False
         self.dhcp = False
+        self.hwaddr = None        
 
         self.username = None
         self.password = None
         self.port = None
         self.drive_path = self.get_drive_path()
+
 
     def get_drive_path(self):
         self.handle = self.lookup(self.name)
@@ -205,6 +214,7 @@ class VM(Hypervisor):
                 if hwaddr in self.hypervisor.dhcp:
                     self.ipaddr = self.hypervisor.dhcp[hwaddr].get('ipaddr', False)
                     self.dhcp = self.hypervisor.dhcp[hwaddr]
+                    self.hwaddr = hwaddr
                 else:
                     self.log.error("Error case - sleep and retry")
                     continue

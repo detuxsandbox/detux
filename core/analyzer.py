@@ -52,13 +52,13 @@ class HostAnalzer_Linux(object):
                     self.log.debug(line)
 
     def hash_filesystem(self):
-        self.log.info("> Hashing FS")
+        self.log.info("> Hashing FS!")
         fs = []
         for _ in self.g.find("/"):
             f = "/" + _
             if self.g.is_file(f):
                 try:
-                    fs.append("{}-{}".format(self.g.checksum("md5", posix_path(f)), f))
+                    fs.append("{}-{}".format(self.g.checksum("sha256", posix_path(f)), f))
                 except Exception as e:
                     print("Exception hashing: {} ({})".format(f, e))
                 
@@ -80,7 +80,7 @@ def save_files(disk_path, fList, folderPath):
     h = HostAnalzer_Linux(disk_path)
     for filename in fList:
         if h.g.is_file(filename):
-            h.log.info("> Fetching %s - (%s)" % (filename, folderPath + filename.replace('/', "_")))
+#            h.log.debug("> Fetching %s - (%s)" % (filename, folderPath + filename.replace('/', "_")))
             with open(folderPath + filename.replace('/', "_"), "wb") as w:
                 w.write(h.g.read_file(filename))
     h.close()

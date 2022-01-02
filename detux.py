@@ -29,7 +29,6 @@ if __name__ == "__main__":
     parser.add_argument('--os',  help= "Operating System type", choices= ['windows', 'linux'], default= 'auto', dest='os')    
     parser.add_argument('--int',  help= "Architecture type", choices= ['python', 'perl', 'sh', 'bash'], default= None, dest='interpreter')
     parser.add_argument('--timeout',  help= "Set sample runtime", type=int, default= 300, required=False, dest='timeout')
-    parser.add_argument('--report', help= "JSON report output path",  required=True, dest='report_path')
     parser.add_argument('--arguments', help= "Sample Arguments",  required=False, dest='sample_args')
 
     args = parser.parse_args()

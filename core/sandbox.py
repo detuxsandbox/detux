@@ -62,7 +62,7 @@ class Linux_SandboxHandler(object):
             result = "".join(stdout.readlines()+ stderr.readlines())
         except Exception as e:
             self.log.error(e)
-            self.log.error("[+] Error in ssh_execute: %s" % (e,))
+            self.log.error("[+] Error in ssh_execute: %s {%s }" % (e, result))
             return None
         return result
 
@@ -148,14 +148,14 @@ class Sandbox:
                     self.hypervisor.vms[s].password = self.sandboxes[s]['password']                    
                     self.hypervisor.vms[s].port = self.sandboxes[s]['port']
                     self.hypervisor.vms[s].env = self.sandboxes[s]['env']
-
-
+                    
                     opt.append(self.hypervisor.vms[s])
         return opt        
 
     def run(self, sample, results):
         self.log.info("> Starting... ")
-
+        if sample.os == "UNK":
+            return False
         target_env = None
         target_env_list = self.select_environment(sample)
         for target_env in target_env_list:
