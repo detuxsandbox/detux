@@ -51,7 +51,7 @@ class Report:
             self.new_hashes.append(rec)
 
         for p_pre in [i for i in s_fs1 if i not in s_fs2 ]:
-            rec = p_post.lstrip().split("-", 1)
+            rec = p_pre.lstrip().split("-", 1)
             self.deleted_hashes.append(rec)
 
 
