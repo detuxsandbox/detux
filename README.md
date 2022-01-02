@@ -1,4 +1,4 @@
-# In Development // Not Working
+# (Beta stage)
 
 ![Logo](detux.png)
 ## The Multiplatform Linux Sandbox
