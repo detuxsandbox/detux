@@ -17,9 +17,6 @@ from magic import Magic
 
 from core.common import new_logger
 
-
-
-
 class SandboxRun(object):
     def __init__(self, filepath, args, platform, os, timeout):
         self.log = new_logger("SandboxRun")
@@ -82,10 +79,13 @@ class SandboxRun(object):
         if filetype.startswith("ELF"):
             if "64-bit" in filetype:
                 return filetype, "x64", "linux"
+            return filetype, "x64", "linux"
 
         if filetype.startswith("PE32"):
             if "x86-64" in filetype:
                 return filetype, "x64", "windows"
+            return filetype, "x64", "windows"
+
         return filetype, "UNK", "UNK"
 
 
@@ -150,11 +150,13 @@ class VM(Hypervisor):
         self.ready = False
         self.ipaddr = False
         self.dhcp = False
+        self.hwaddr = None        
 
         self.username = None
         self.password = None
         self.port = None
         self.drive_path = self.get_drive_path()
+
 
     def get_drive_path(self):
         self.handle = self.lookup(self.name)
@@ -180,6 +182,7 @@ class VM(Hypervisor):
                 if hwaddr in self.hypervisor.dhcp:
                     self.ipaddr = self.hypervisor.dhcp[hwaddr].get('ipaddr', False)
                     self.dhcp = self.hypervisor.dhcp[hwaddr]
+                    self.hwaddr = hwaddr
                 else:
                     self.log.error("Error case - sleep and retry")
                     continue

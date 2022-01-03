@@ -1,7 +1,13 @@
-# In Development // Not Working
+# (Beta stage)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/silascutler/DetuxNG/graphs/commit-activity)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+
 
 ![Logo](detux.png)
 ## The Multiplatform Linux Sandbox
+DetuxNG is a malware sandbox developed for daily use by analysts.  Based on QEMU and using SSH for system control, DetuxNG can support environments of multiple architectures (x86, x64, ARM, MIPS, etc) and operating systems (windows, linux, android).  
+
+DetuxNG is not designed for enterprise use. 
 
 
 ### Introduction:
@@ -14,6 +20,8 @@ DetuxNG is a sandbox developed to do magic
  - Bash scripts will do net installs
  - power off vm
  - take snapshot
+
+Detux requires specific machine name format
 
 (Win10):
     Enable SSH server
@@ -28,11 +36,6 @@ DetuxNG is a sandbox developed to do magic
 
 
 
-
-
-
-
-
 ### Contributers / Thanks:
 Following is a list of early developers and contributors that we'd like to thank for their help.
 - Vikas Iyengar - The brain ( [dudeintheshell](https://github.com/dudeintheshell) , email: iyengar.vikas@gmail.com ) 
@@ -40,3 +43,4 @@ Following is a list of early developers and contributors that we'd like to thank
 - Rahul Binjve - Help in pcap parsing ([@c0dist](https://github.com/c0dist), [twitter](https://twitter.com/c0dist))
 - Amey Gat - Help in pcap parsing ([ameygat](https://github.com/ameygat), ameygat@gmail.com )
 - Thanks to Aurélien Jarno (@aurel32) (https://www.aurel32.net/) for the pre-built VM images.
+- Joe Stewart (@joestewart71) for developing Truman years ago and the immeasurable amount he has  done. 
