@@ -7,21 +7,20 @@
 # Import Detux packages
 from core.sandbox import Sandbox
 from core.report import Report
-from core.objects import SandboxRun, Hypervisor
+from core.Hypervisor import Hypervisor
+from core.SandboxRun import SandboxRun
 
 from core.common import new_logger
 log = new_logger("main")
 
 # import other python packages
-import json
 import sys
 import os
 import argparse
 
 config_file = "detux.cfg"
 
-if __name__ == "__main__":
-
+def parse_args():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,)
     parser.add_argument('--sample', help= "Sample path", required=True, dest='sample_path')
     parser.add_argument('--cpu',  help= "CPU type", choices= ['x64'], default= 'auto', dest='cpu')
@@ -29,15 +28,13 @@ if __name__ == "__main__":
     parser.add_argument('--timeout',  help= "Set sample runtime", type=int, default= 300, required=False, dest='timeout')
     parser.add_argument('--arguments', help= "Sample Arguments",  required=False, dest='sample_args')
 
-    args = parser.parse_args()
-    cpu = ""
+    return  parser.parse_args()    
 
-    log.info("> Processing: {}".format(args.sample_path))
-    log.info("> Args: {}".format(args.sample_args))
-    log.info("> Timeout: {}".format(args.timeout))
+if __name__ == "__main__":
+    args = parse_args()
 
     # Setup our sample run 
-    samplerun = SandboxRun(args.sample_path, args.sample_args, args.cpu, args.os, args.timeout)
+    samplerun = SandboxRun(args)
 
     # Setup our handle the the hypervisor 
     hypervisor = Hypervisor()
@@ -45,7 +42,6 @@ if __name__ == "__main__":
     # Setup our Sandbox handle
     sandbox = Sandbox(config_file, hypervisor)
 
-    # Create a report
     report = Report(samplerun)
     result = sandbox.run(samplerun, report)
 

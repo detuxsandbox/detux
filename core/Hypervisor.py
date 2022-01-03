@@ -2,92 +2,11 @@
 # Copyright (c) 2021 Silas Cutler, silas.cutler@gmail.com (https://silascutler.com/)
 # See the file 'COPYING' for copying permission.
 
-import os
 import re
 import sys
 import time
 import libvirt
-import logging
-import threading
-import signal
-import subprocess
-
-import hashlib
-from magic import Magic
-
 from core.common import new_logger
-
-class SandboxRun(object):
-    def __init__(self, filepath, args, platform, os, timeout):
-        self.log = new_logger("SandboxRun")
-
-        self.filepath = filepath
-        self.hashes = self.hashfile()
-        self.args = args
-
-        if platform == "auto":
-            _ = self.identify_arch(filepath)
-            self.filetype = _[0]
-            self.platform = _[1]
-            self.os = _[2]
-
-        else:
-            self.filetype = 'auto'
-            self.platform = platform
-            self.os = os
-
-
-        self.starttime = None # When the sample started
-        self.stoptime = None # When the sample stopped
-        self.endtime = None # When the sample should stop
-
-        self.timeout = timeout
-
-    def get_exec_command(self):
-        if self.os == "linux":
-            return "chmod +x /sample && nohup /sample > /dev/null 2>&1 >> /var/log/runlog &"
-        else:
-            return "START /B /sample"
-
-
-    def hashfile(self):
-        return {
-            "md5": hashlib.md5(open(self.filepath,'rb').read()).hexdigest(),
-            "sha1": hashlib.sha1(open(self.filepath,'rb').read()).hexdigest(),
-            "sha256": hashlib.sha256(open(self.filepath,'rb').read()).hexdigest()
-        }
-
-    def mark_start(self):
-        self.starttime = int(time.time())
-        self.endtime = self.starttime + self.timeout
-
-    def mark_end(self):
-        self.endtime = int(time.time())
-
-
-    def identify_arch(self, filepath):
-        m = Magic()
-        filetype = ""
-        try:
-            filetype = m.from_file(filepath)
-        except Exception as e:
-            # certain version of libmagic throws error while parsing file, the CPU information is however included in the error in somecases
-            filetype = str(e)
-        if "Bourne-Again" in filetype:
-            return filetype, "x64", "linux"
-
-        if filetype.startswith("ELF"):
-            if "64-bit" in filetype:
-                return filetype, "x64", "linux"
-            return filetype, "x64", "linux"
-
-        if filetype.startswith("PE32"):
-            if "x86-64" in filetype:
-                return filetype, "x64", "windows"
-            return filetype, "x64", "windows"
-
-        return filetype, "UNK", "UNK"
-
 
 class Hypervisor(object):
     def __init__(self, sconn='qemu:///system'):
@@ -199,26 +118,21 @@ class VM(Hypervisor):
         self.handle.revertToSnapshot(self.handle.snapshotCurrent())
 
     def poweron(self):
-#        print(self.get_state())
         self.restore_snapshot()
-#        time.sleep(2)
         self.handle.create()
 #        time.sleep(5)
         return True
 
-    # Not working yet
     def shutdown(self):
         self.restore_snapshot()
         if self.get_state() == libvirt.VIR_DOMAIN_RUNNING:
             self.handle.shutdown()
 
-    # Not working yet
     def reset(self):
         self.restore_snapshot()
         if self.get_state() == libvirt.VIR_DOMAIN_RUNNING:
             self.handle.shutdown()
 
-    # 
     def reboot(self):
         self.handle.reboot()
 
