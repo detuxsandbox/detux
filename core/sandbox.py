@@ -11,13 +11,11 @@ import random
 import paramiko
 
 from configparser import ConfigParser
-from core.objects import Hypervisor, PCAPHandler
+from core.objects import Hypervisor
+from core.report import PCAPHandler
 from core.analyzer import hash_filesystem
 
 from core.common import new_logger
-
-
-
 
 # Linux_SandboxHandler defines an object that handles interations with the sandbox using
 # SSH (using paramiko).  This object will also hold basic introspection functionality.
@@ -104,9 +102,6 @@ class Sandbox:
         self.config.read(config_path)
 
         self.hypervisor = hypervisor
-
-        self.default_cpu = self.config.get("detux", "default_cpu")
-        self.debug = self.config.get("detux", "debug_log")
 
         self.sandboxes = {}
         self.load_mapping()
